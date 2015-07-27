@@ -8,8 +8,7 @@
     <script src="../lib/vis.js"></script>
     <style type="text/css">
         #mynetwork {
-            width: 800px;
-            height: 400px;
+
             border: 1px solid lightgray;
         }
     </style>
@@ -19,8 +18,11 @@
 
 <script type="text/javascript">
 
+    var PATH_CACHE = {};
+    var path_index = 0;
+    var CLEANUP = null;
 
-    function traverse(node, nodes, edges) {
+    function traverse(node, nodes, edges, paths) {
 
         if (!nodes.get(node.callUID)) {
             nodes.add({
@@ -29,6 +31,10 @@
             })
         }
 
+        path_index++;
+        paths.push(node.callUID);
+
+        PATH_CACHE[path_index] = paths.slice();
 
         if (node.children) {
             for (var i = 0; i < node.children.length; i++) {
@@ -37,12 +43,14 @@
                     from: node.callUID,
                     to: node.children[i].callUID
                 })
-                traverse(node.children[i], nodes, edges)
+
+                // depth first
+                traverse(node.children[i], nodes, edges, paths.slice());
             }
         }
     }
 
-    $.getJSON("condition.cpuprofile", function (result) {
+    $.getJSON("oneapm.cpuprofile", function (result) {
 
         // create an array with nodes
         var nodes = new vis.DataSet();
@@ -54,33 +62,64 @@
         var container = document.getElementById('mynetwork');
 
 
-        traverse(result.head, nodes, edges);
+        traverse(result.head, nodes, edges, []);
 
         var data = {
             nodes: nodes,
             edges: edges
         };
-        var options = {};
-        var network = new vis.Network(container, data, options);
 
+        var options = {
+            width: "100%",
+            height: "600px",
+            interaction: {
+                selectConnectedEdges: false
+            }
+        };
+        var network = new vis.Network(container, data, options);
 
         $("#time").attr({
             min: result.timestamps[0],
             max: result.timestamps[result.timestamps.length - 1],
         }).mousemove(function () {
             var selected = $(this).val();
-
             for (var i = 0; i < result.timestamps.length; i++) {
                 if (selected <= result.timestamps[i]) {
-                    console.log(selected, i, result.timestamps[i], result.samples[i]);
+                    $("#time_text").text("time:" + (result.timestamps[i] - result.timestamps[0]) / 1E3 + "  ms active_path:" + result.samples[i]);
+                    var node_in_path = nodes.get(CLEANUP);
+
+                    node_in_path.forEach(function (item) {
+                        item.color = "gray";
+                        item.font = {
+                            color: "white"
+                        }
+                        nodes.update(item);
+                    });
+
+                    var node_in_path = nodes.get(PATH_CACHE[result.samples[i]]);
+
+                    node_in_path.forEach(function (item) {
+                        item.color = "blue";
+                        item.font = {
+                            color: "white"
+                        }
+                        nodes.update(item);
+                    });
+
+                    CLEANUP = PATH_CACHE[PATH_CACHE[result.samples[i]]].slice();
+
+
                     break;
                 }
             }
-
-        })
-
+        }).trigger('change');
     })
 </script>
-<input id="time" type="range" style="width: 800px"/>
+<form>
+    <label>
+        <span id="time_text"></span><br/>
+        <input id="time" type="range" style="width: 800px"/>
+    </label>
+</form>
 </body>
 </html>
