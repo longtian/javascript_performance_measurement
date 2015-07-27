@@ -37,3 +37,71 @@ Chrome Dev Tools 自带的 Profile 功能非常好用。用它可以方便的生
 2\. 鼠标滚轮可以缩放图片
 
 3\. 拖过滑块可以查看每个时间点的详细情况
+
+
+## 2. snapshot 数据结构解读
+
+运行代码 `index.html`，创建 Snapshot。
+
+![heapsnapshot](./devtools_heapsnapshot_screenshot.png)
+
+随便找一个数字例如 `206751`，在 `nodes.json` 中查找 `206751` ，定位到这行
+
+nodes.json#L3630
+
+```
+,3,1726,206751,40,4,0
+```
+
+每一列的含义可在 sample.heapsnapshot.json#L4 中找到
+
+```
+  "node_fields": [
+    "type",
+    "name",
+    "id",
+    "self_size",
+    "edge_count",
+    "trace_node_id"
+  ],
+```
+
+type 是一个数字，对应类型存在这个对象里
+
+```
+  "node_types": [
+    [
+      "hidden",
+      "array",
+      "string",
+      "object",
+      "code",
+      "closure",
+      "regexp",
+      "number",
+      "native",
+      "synthetic",
+      "concatenated string",
+      "sliced string"
+    ],
+```
+
+关联起来解读：
+
+- 3 type node_types[3]="object" 表示这是一个 object 对象
+
+- 1726 name string[1726]="People" 这个对象的名字是 People
+
+- 206751 id 对象示例的 id
+
+- 40 self_size 对象的 shallow size
+
+- 4 edge_count 
+
+- 0 trace_node_id
+
+string[1726]="People"
+@206751 
+40 shallow size
+
+

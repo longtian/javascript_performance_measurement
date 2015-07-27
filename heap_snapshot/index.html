@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title>Dad</title>
+</head>
+
+<body>
+<h1 id="count"></h1>
+<button onclick="dad.children.push(new People());updateUI()">ADD</button>
+</body>
+<script type="text/javascript">
+    function People() {
+        this.children = [];
+        this.id = (new Array(1E4)).join("*")
+    }
+
+    var dad = new People();
+
+    function updateUI() {
+        document.getElementById('count').innerHTML = 1 + dad.children.length;
+    }
+
+    // x10
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+    dad.children.push(new People());
+
+    updateUI();
+
+
+</script>
+
+</html>
