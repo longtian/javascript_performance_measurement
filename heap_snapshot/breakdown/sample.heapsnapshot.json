@@ -72,8 +72,5 @@
     "node_count": 66831,
     "edge_count": 325072,
     "trace_function_count": 0
-  },
-  "trace_function_infos": [],
-  "trace_tree": [],
-  "samples": [],
+  }
 }
