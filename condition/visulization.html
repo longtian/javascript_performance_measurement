@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../lib/vis.css">
+    <script src="../lib/jquery-2.1.3.js"></script>
+    <script src="../lib/vis.js"></script>
+    <style type="text/css">
+        #mynetwork {
+
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+
+    var PATH_CACHE = {};
+    var path_index = 0;
+    var CLEANUP = null;
+
+    function traverse(node, nodes, edges, paths) {
+
+        if (!nodes.get(node.callUID)) {
+            nodes.add({
+                id: node.callUID,
+                label: node.functionName
+            })
+        }
+
+        path_index++;
+        paths.push(node.callUID);
+
+        PATH_CACHE[path_index] = paths.slice();
+
+        if (node.children) {
+            for (var i = 0; i < node.children.length; i++) {
+                edges.add({
+                    arrows: "to",
+                    from: node.callUID,
+                    to: node.children[i].callUID
+                })
+
+                // depth first
+                traverse(node.children[i], nodes, edges, paths.slice());
+            }
+        }
+    }
+
+    $.getJSON("oneapm.cpuprofile", function (result) {
+
+        // create an array with nodes
+        var nodes = new vis.DataSet();
+
+        // create an array with edges
+        var edges = new vis.DataSet();
+
+        // create a network
+        var container = document.getElementById('mynetwork');
+
+
+        traverse(result.head, nodes, edges, []);
+
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+
+        var options = {
+            width: "100%",
+            height: "600px",
+            interaction: {
+                selectConnectedEdges: false
+            }
+        };
+        var network = new vis.Network(container, data, options);
+
+        $("#time").attr({
+            min: result.timestamps[0],
+            max: result.timestamps[result.timestamps.length - 1],
+        }).mousemove(function () {
+            var selected = $(this).val();
+            for (var i = 0; i < result.timestamps.length; i++) {
+                if (selected <= result.timestamps[i]) {
+                    $("#time_text").text("time:" + (result.timestamps[i] - result.timestamps[0]) / 1E3 + "  ms active_path:" + result.samples[i]);
+                    var node_in_path = nodes.get(CLEANUP);
+
+                    node_in_path.forEach(function (item) {
+                        item.color = "gray";
+                        item.font = {
+                            color: "white"
+                        }
+                        nodes.update(item);
+                    });
+
+                    var node_in_path = nodes.get(PATH_CACHE[result.samples[i]]);
+
+                    node_in_path.forEach(function (item) {
+                        item.color = "blue";
+                        item.font = {
+                            color: "white"
+                        }
+                        nodes.update(item);
+                    });
+
+                    CLEANUP = PATH_CACHE[PATH_CACHE[result.samples[i]]].slice();
+
+
+                    break;
+                }
+            }
+        }).trigger('change');
+    })
+</script>
+<form>
+    <label>
+        <span id="time_text"></span><br/>
+        <input id="time" type="range" style="width: 800px"/>
+    </label>
+</form>
+</body>
+</html>
