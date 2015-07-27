@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>CPU Profile Topology</title>
     <link rel="stylesheet" href="../lib/vis.css">
     <script src="../lib/jquery-2.1.3.js"></script>
     <script src="../lib/vis.js"></script>
     <style type="text/css">
         #mynetwork {
-
             border: 1px solid lightgray;
         }
     </style>
 </head>
 <body>
-<div id="mynetwork"></div>
+<div id="topology">
+   <img src="../images/indicator_medium.gif" alt="加载中"/>
+</div>
 
 <script type="text/javascript">
 
@@ -27,7 +28,11 @@
         if (!nodes.get(node.callUID)) {
             nodes.add({
                 id: node.callUID,
-                label: node.functionName
+                label: node.functionName,
+                font: {
+                    color: "white"
+                },
+                color: "gray"
             })
         }
 
@@ -59,7 +64,7 @@
         var edges = new vis.DataSet();
 
         // create a network
-        var container = document.getElementById('mynetwork');
+        var container = document.getElementById('topology');
 
 
         traverse(result.head, nodes, edges, []);
@@ -90,9 +95,6 @@
 
                     node_in_path.forEach(function (item) {
                         item.color = "gray";
-                        item.font = {
-                            color: "white"
-                        }
                         nodes.update(item);
                     });
 
@@ -100,14 +102,10 @@
 
                     node_in_path.forEach(function (item) {
                         item.color = "blue";
-                        item.font = {
-                            color: "white"
-                        }
                         nodes.update(item);
                     });
 
                     CLEANUP = PATH_CACHE[PATH_CACHE[result.samples[i]]].slice();
-
 
                     break;
                 }
@@ -118,7 +116,7 @@
 <form>
     <label>
         <span id="time_text"></span><br/>
-        <div><input id="time" type="range" style="width: 726px"/></div>
+        <div><input id="time" type="range" step="1" style="width: 726px"/></div>
         <div><img src="./screenshot_chrome.png"></div>
     </label>
 </form>
