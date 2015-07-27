@@ -1,0 +1,28 @@
+<html>
+<head>
+    <script type="text/javascript">
+
+        function init() {
+            run(10);
+        }
+
+        function main() {
+            init();
+            run(10);
+            run(10);
+        }
+
+        function run(duration) {
+            var sum = 0;
+            var till = Date.now() + duration
+            while (Date.now() < till) {
+                sum = sum + 1;
+            }
+        }
+    </script>
+</head>
+<body>
+<button onclick='console.profile("main");main();console.profileEnd("main")'>main</button>
+</body>
+</html>
+
