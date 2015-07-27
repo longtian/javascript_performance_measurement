@@ -20,8 +20,8 @@ for (var i = 0; i < nodes.length; i += 6) {
             size: 0
         };
 
-    typed_sum[i_type].count++;
     typed_sum[i_type].size += i_size;
+    typed_sum[i_type].count++;
 
     sum += nodes[i + 3];
 }
