@@ -14,48 +14,69 @@
 </head>
 <body>
 <div id="topology">
-   <img src="../images/indicator_medium.gif" alt="加载中"/>
+    <img src="../images/indicator_medium.gif" alt="加载中"/>
 </div>
 
 <script type="text/javascript">
 
-    var PATH_CACHE = {};
-    var path_index = 0;
-    var CLEANUP = null;
-
-    function traverse(node, nodes, edges, paths) {
-
-        if (!nodes.get(node.callUID)) {
-            nodes.add({
-                id: node.callUID,
-                label: node.functionName,
-                font: {
-                    color: "white"
-                },
-                color: "gray"
-            })
-        }
-
-        path_index++;
-        paths.push(node.callUID);
-
-        PATH_CACHE[path_index] = paths.slice();
-
-        if (node.children) {
-            for (var i = 0; i < node.children.length; i++) {
-                edges.add({
-                    arrows: "to",
-                    from: node.callUID,
-                    to: node.children[i].callUID
-                })
-
-                // depth first
-                traverse(node.children[i], nodes, edges, paths.slice());
-            }
-        }
-    }
 
     $.getJSON("sample.cpuprofile", function (result) {
+
+        var PATH_CACHE = {};
+        var CLEANUP = null;
+
+        /**
+         *
+         * travers all nodes, initialize vis, update PATH cache
+         *
+         * @param node begin node
+         * @param vis_nodes VIS
+         * @param vis_edges VIS
+         * @param paths current path
+         */
+        function traverse(node, vis_nodes, vis_edges, paths) {
+
+            if (!vis_nodes.get(node.callUID)) {
+                vis_nodes.add({
+                    id: node.callUID,
+                    label: node.functionName,
+                    font: {
+                        color: "white"
+                    },
+                    color: "gray"
+                })
+            }
+
+            paths.push(node.callUID);
+
+            PATH_CACHE[Object.keys(PATH_CACHE).length + 1] = paths.slice();
+
+            if (node.children) {
+                for (var i = 0; i < node.children.length; i++) {
+                    var child = node.children[i];
+
+                    var exist = vis_edges.get({
+                        filter: function (item) {
+                            return (item.from == node.callUID) && (item.to == child.callUID);
+                        }
+                    })
+
+
+                    if (exist.length === 0) {
+                        vis_edges.add({
+                            arrows: "to",
+                            from: node.callUID,
+                            to: child.callUID,
+                            color: "gray"
+                        })
+                    }
+
+
+                    // depth first
+                    traverse(child, vis_nodes, vis_edges, paths.slice());
+                }
+            }
+        }
 
         // create an array with nodes
         var nodes = new vis.DataSet();
@@ -66,7 +87,6 @@
         // create a network
         var container = document.getElementById('topology');
 
-
         traverse(result.head, nodes, edges, []);
 
         var data = {
@@ -76,11 +96,9 @@
 
         var options = {
             width: "100%",
-            height: "600px",
-            interaction: {
-                selectConnectedEdges: false
-            }
+            height: "600px"
         };
+
         var network = new vis.Network(container, data, options);
 
         $("#time").attr({
@@ -105,7 +123,7 @@
                         nodes.update(item);
                     });
 
-                    CLEANUP = PATH_CACHE[PATH_CACHE[result.samples[i]]].slice();
+                    CLEANUP =PATH_CACHE[result.samples[i]].slice();
 
                     break;
                 }
@@ -116,6 +134,7 @@
 <form>
     <label>
         <span id="time_text"></span><br/>
+
         <div><input id="time" type="range" step="1" style="width: 726px"/></div>
         <div><img src="./screenshot_chrome.png"></div>
     </label>
