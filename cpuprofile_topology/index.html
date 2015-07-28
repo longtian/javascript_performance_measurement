@@ -109,21 +109,27 @@
             for (var i = 0; i < result.timestamps.length; i++) {
                 if (selected <= result.timestamps[i]) {
                     $("#time_text").text("time:" + (result.timestamps[i] - result.timestamps[0]) / 1E3 + "  ms active_path:" + result.samples[i]);
+
+
+                    // first,revert colors
                     var node_in_path = nodes.get(CLEANUP);
 
                     node_in_path.forEach(function (item) {
                         item.color = "gray";
-                        nodes.update(item);
                     });
 
+                    nodes.update(node_in_path);
+
+                    // second, update lines
                     var node_in_path = nodes.get(PATH_CACHE[result.samples[i]]);
 
                     node_in_path.forEach(function (item) {
                         item.color = "blue";
-                        nodes.update(item);
                     });
 
-                    CLEANUP =PATH_CACHE[result.samples[i]].slice();
+                    nodes.update(node_in_path);
+
+                    CLEANUP = PATH_CACHE[result.samples[i]].slice();
 
                     break;
                 }
