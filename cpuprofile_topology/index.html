@@ -27,6 +27,7 @@
         var CLEANUP = null;
         var INACTIVE_COLOR = "#999999";
         var ACTIVE_COLOR = "blue";
+        var SYSTEM_COLOR = "black";
 
         /**
          *
@@ -50,18 +51,25 @@
                     },
                     color: {
                         background: INACTIVE_COLOR,
-                        border: isDeopt ? "red" : INACTIVE_COLOR,
+                        border: INACTIVE_COLOR,
                         highlight: {
                             background: ACTIVE_COLOR,
                             border: ACTIVE_COLOR
                         }
                     },
                     level: paths.length,
-                    borderWidth: isDeopt ? 2 : 1
+                    borderWidth: 1
                 }
 
                 if (isDeopt) {
                     node_def.title = node.deoptReason;
+                    node_def.color.border = "read";
+                    node_def.borderWidth = 2;
+                }
+
+                if (["(program)", "(garbage collector)", "(idle)"].indexOf(node.functionName) != -1) {
+                    node_def.shape = "box";
+                    node_def.color = SYSTEM_COLOR;
                 }
 
                 vis_nodes.add(node_def);
@@ -76,7 +84,7 @@
                     var child = node.children[i];
                     var id = node.callUI + "-" + child.callUID;
                     var exist = vis_edges.get(id);
-                    
+
                     if (!exist) {
                         vis_edges.add({
                             arrows: "to",
