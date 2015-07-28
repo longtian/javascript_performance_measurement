@@ -1,4 +1,5 @@
-# 用拓扑图的方式展现 CPU Profile 结果
+# OneProfile
+## 用拓扑图的方式展现 CPU Profile 结果
 
 Chrome Dev Tools 自带的 Profile 功能非常好用。用它可以方便的生成 JavaScript 的 `Flame Chart`。
 
@@ -49,8 +50,8 @@ Chrome Dev Tools 自带的 Profile 功能非常好用。用它可以方便的生
 
 百度地图：
 
-![baidu](./cpuprofile_topology/baidumaps.png)
+![baidu](./baidumaps.png)
 
 淘宝首页：
 
-![taobao](./cpuprofile_topology/taobao.png)
+![taobao](./taobao.png)
