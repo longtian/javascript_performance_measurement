@@ -24,6 +24,8 @@
 
         var PATH_CACHE = {};
         var CLEANUP = null;
+        var INACTIVE_COLOR = "#999999";
+        var ACTIVE_COLOR = "blue";
 
         /**
          *
@@ -37,13 +39,19 @@
         function traverse(node, vis_nodes, vis_edges, paths) {
 
             if (!vis_nodes.get(node.callUID)) {
+                var isDeopt = node.deoptReason.length == 0 || node.deoptReason == "no reason";
                 vis_nodes.add({
                     id: node.callUID,
                     label: node.functionName,
                     font: {
                         color: "white"
                     },
-                    color: "gray"
+                    title: node.deoptReason,
+                    color: {
+                        background: INACTIVE_COLOR,
+                        border: isDeopt ? INACTIVE_COLOR : "red"
+                    },
+                    borderWidth: isDeopt ? 1 : 2
                 })
             }
 
@@ -61,16 +69,14 @@
                         }
                     })
 
-
                     if (exist.length === 0) {
                         vis_edges.add({
                             arrows: "to",
                             from: node.callUID,
                             to: child.callUID,
-                            color: "gray"
+                            color: INACTIVE_COLOR
                         })
                     }
-
 
                     // depth first
                     traverse(child, vis_nodes, vis_edges, paths.slice());
@@ -115,7 +121,7 @@
                     var node_in_path = nodes.get(CLEANUP);
 
                     node_in_path.forEach(function (item) {
-                        item.color = "gray";
+                        item.color.background = INACTIVE_COLOR;
                     });
 
                     nodes.update(node_in_path);
@@ -124,7 +130,7 @@
                     var node_in_path = nodes.get(PATH_CACHE[result.samples[i]]);
 
                     node_in_path.forEach(function (item) {
-                        item.color = "blue";
+                        item.color.background = ACTIVE_COLOR;
                     });
 
                     nodes.update(node_in_path);
