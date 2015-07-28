@@ -28,6 +28,7 @@
         var INACTIVE_COLOR = "#999999";
         var ACTIVE_COLOR = "blue";
         var SYSTEM_COLOR = "black";
+        var DEOPT_COLOR = "#E54D4F";
 
         /**
          *
@@ -63,7 +64,8 @@
 
                 if (isDeopt) {
                     node_def.title = node.deoptReason;
-                    node_def.color.border = "read";
+                    node_def.color.border = DEOPT_COLOR;
+                    node_def.color.background = DEOPT_COLOR;
                     node_def.borderWidth = 2;
                 }
 
