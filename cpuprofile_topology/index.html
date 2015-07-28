@@ -50,7 +50,11 @@
                     },
                     color: {
                         background: INACTIVE_COLOR,
-                        border: isDeopt ? "red" : INACTIVE_COLOR
+                        border: isDeopt ? "red" : INACTIVE_COLOR,
+                        highlight: {
+                            background: ACTIVE_COLOR,
+                            border: ACTIVE_COLOR
+                        }
                     },
                     level: paths.length,
                     borderWidth: isDeopt ? 2 : 1
@@ -70,19 +74,16 @@
             if (node.children) {
                 for (var i = 0; i < node.children.length; i++) {
                     var child = node.children[i];
-
-                    var exist = vis_edges.get({
-                        filter: function (item) {
-                            return (item.from == node.callUID) && (item.to == child.callUID);
-                        }
-                    })
-
-                    if (exist.length === 0) {
+                    var id = node.callUI + "-" + child.callUID;
+                    var exist = vis_edges.get(id);
+                    
+                    if (!exist) {
                         vis_edges.add({
                             arrows: "to",
                             from: node.callUID,
                             to: child.callUID,
-                            color: INACTIVE_COLOR
+                            color: INACTIVE_COLOR,
+                            id: id
                         })
                     }
 
@@ -133,28 +134,7 @@
             for (var i = 0; i < result.timestamps.length; i++) {
                 if (selected <= result.timestamps[i]) {
                     $("#time_text").text("time:" + (result.timestamps[i] - result.timestamps[0]) / 1E3 + "  ms active_path:" + result.samples[i]);
-
-
-                    // first,revert colors
-                    var node_in_path = nodes.get(CLEANUP);
-
-                    node_in_path.forEach(function (item) {
-                        item.color.background = INACTIVE_COLOR;
-                    });
-
-                    nodes.update(node_in_path);
-
-                    // second, update lines
-                    var node_in_path = nodes.get(PATH_CACHE[result.samples[i]]);
-
-                    node_in_path.forEach(function (item) {
-                        item.color.background = ACTIVE_COLOR;
-                    });
-
-                    nodes.update(node_in_path);
-
-                    CLEANUP = PATH_CACHE[result.samples[i]].slice();
-
+                    network.selectNodes(PATH_CACHE[result.samples[i]]);
                     LAST_SELECTED = i;
                     break;
                 }
