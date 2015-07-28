@@ -40,7 +40,7 @@
         function traverse(node, vis_nodes, vis_edges, paths) {
 
             if (!vis_nodes.get(node.callUID)) {
-                var isDeopt = node.deoptReason.length == 0 || node.deoptReason == "no reason";
+                var isDeopt = node.deoptReason !== "no reason" && node.deoptReason.length > 0;
 
                 var node_def = {
                     id: node.callUID,
@@ -50,9 +50,10 @@
                     },
                     color: {
                         background: INACTIVE_COLOR,
-                        border: isDeopt ? INACTIVE_COLOR : "red"
+                        border: isDeopt ? "red" : INACTIVE_COLOR
                     },
-                    borderWidth: isDeopt ? 1 : 2
+                    level: paths.length,
+                    borderWidth: isDeopt ? 2 : 1
                 }
 
                 if (isDeopt) {
@@ -109,7 +110,12 @@
 
         var options = {
             width: "100%",
-            height: "600px"
+            height: "600px",
+            layout: {
+                hierarchical: {
+                    enabled: true
+                }
+            }
         };
 
         var network = new vis.Network(container, data, options);
@@ -117,7 +123,7 @@
         $("#time").attr({
             min: result.timestamps[0],
             max: result.timestamps[result.timestamps.length - 1],
-        }).mousemove(_.throttle(mousemove_handler, 10)).trigger('change');
+        }).mousemove(_.throttle(mousemove_handler, 10)).trigger('mousemove');
 
 
         var LAST_SELECTED = 0;
@@ -178,14 +184,7 @@
     <button id="prev">prev</button>
     <button id="next">next</button>
     <span id="time_text"></span>
-    <label>
-        <div>
-            <input id="time" type="range" step="1" style="width: 726px"/>
-        </div>
-        <div>
-            <img src="./screenshot_chrome.png">
-        </div>
-    </label>
+    <input id="time" type="range" step="1" style="width: 100%"/>
 </form>
 </body>
 </html>
