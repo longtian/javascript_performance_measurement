@@ -40,19 +40,25 @@
 
             if (!vis_nodes.get(node.callUID)) {
                 var isDeopt = node.deoptReason.length == 0 || node.deoptReason == "no reason";
-                vis_nodes.add({
+
+                var node_def = {
                     id: node.callUID,
                     label: node.functionName,
                     font: {
                         color: "white"
                     },
-                    title: node.deoptReason,
                     color: {
                         background: INACTIVE_COLOR,
                         border: isDeopt ? INACTIVE_COLOR : "red"
                     },
                     borderWidth: isDeopt ? 1 : 2
-                })
+                }
+
+                if (isDeopt) {
+                    node_def.title = node.deoptReason;
+                }
+
+                vis_nodes.add(node_def);
             }
 
             paths.push(node.callUID);
