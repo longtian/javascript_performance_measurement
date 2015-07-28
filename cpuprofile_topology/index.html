@@ -61,7 +61,6 @@
 <div id="topology">
     <img src="../lib/indicator_medium.gif" alt="加载中"/>
 </div>
-
 <script type="text/javascript">
 
     $(function () {
@@ -206,8 +205,8 @@
         };
 
         var options = {
-            width: "100%",
-            height: "600px",
+            width: "95%",
+            height: (window.innerHeight - $("#drop").outerHeight() - $("#control").outerHeight()-40) + "px",
             layout: {
                 hierarchical: {
                     enabled: true
@@ -256,16 +255,19 @@
 
     }
 </script>
-<form>
-    <button id="prev">prev</button>
-    <button id="next">next</button>
-    <span id="time_text"></span>
-    <input id="time" type="range" step="1" style="width: 100%"/>
-</form>
-<footer>
-    2015 MIT License <a target="_blank"
-                        href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">OneProfile
-    on Github</a>
-</footer>
+<div id="control">
+    <form>
+        <button id="prev">prev</button>
+        <button id="next">next</button>
+        <span id="time_text"></span>
+        <input id="time" type="range" step="1" style="width: 98%"/>
+    </form>
+    <footer>
+        2015 MIT License <a target="_blank"
+                            href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">OneProfile
+        on Github</a>
+    </footer>
+</div>
+
 </body>
 </html>
