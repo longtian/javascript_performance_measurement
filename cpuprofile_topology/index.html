@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>CPU Profile Topology</title>
     <link rel="stylesheet" href="../lib/vis.css">
-    <script src="../lib/jquery-2.1.3.js"></script>
+    <script src="../lib/jquery-2.1.4.min.js"></script>
+    <script src="../lib/underscore-min.js"></script>
     <script src="../lib/vis.js"></script>
     <style type="text/css">
         #mynetwork {
@@ -116,8 +117,13 @@
         $("#time").attr({
             min: result.timestamps[0],
             max: result.timestamps[result.timestamps.length - 1],
-        }).mousemove(function () {
-            var selected = $(this).val();
+        }).mousemove(_.throttle(mousemove_handler, 10)).trigger('change');
+
+
+        var LAST_SELECTED = 0;
+
+        function mousemove_handler() {
+            var selected = $("#time").val();
             for (var i = 0; i < result.timestamps.length; i++) {
                 if (selected <= result.timestamps[i]) {
                     $("#time_text").text("time:" + (result.timestamps[i] - result.timestamps[0]) / 1E3 + "  ms active_path:" + result.samples[i]);
@@ -143,18 +149,42 @@
 
                     CLEANUP = PATH_CACHE[result.samples[i]].slice();
 
+                    LAST_SELECTED = i;
                     break;
                 }
             }
-        }).trigger('change');
+        }
+
+        $("#next").click(function () {
+            if (LAST_SELECTED < result.timestamps.length - 1) {
+                $("#time").val(result.timestamps[LAST_SELECTED + 1]);
+                $("#time").trigger("mousemove")
+            }
+
+            return false;
+        })
+
+        $("#prev").click(function () {
+            if (LAST_SELECTED > 0) {
+                $("#time").val(result.timestamps[LAST_SELECTED - 1]);
+                $("#time").trigger("mousemove")
+            }
+            return false;
+        })
+
     })
 </script>
 <form>
+    <button id="prev">prev</button>
+    <button id="next">next</button>
+    <span id="time_text"></span>
     <label>
-        <span id="time_text"></span><br/>
-
-        <div><input id="time" type="range" step="1" style="width: 726px"/></div>
-        <div><img src="./screenshot_chrome.png"></div>
+        <div>
+            <input id="time" type="range" step="1" style="width: 726px"/>
+        </div>
+        <div>
+            <img src="./screenshot_chrome.png">
+        </div>
     </label>
 </form>
 </body>
