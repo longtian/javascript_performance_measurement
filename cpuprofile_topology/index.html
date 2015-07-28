@@ -11,17 +11,67 @@
         #mynetwork {
             border: 1px solid lightgray;
         }
+
+        #drop {
+            text-align: center;
+            border: 4px dashed #999999;
+            background: #cccccc;
+            z-index: 1;
+            font-size: 2em;
+            color: #999999;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        #topology {
+            box-shadow: 0 0 10px black;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
+<div id="drop">把 .cpuprofile 文件拖到这儿</div>
 <div id="topology">
     <img src="../images/indicator_medium.gif" alt="加载中"/>
 </div>
 
 <script type="text/javascript">
 
+    $(function () {
 
-    $.getJSON("sample.cpuprofile", function (result) {
+        $("#drop").on('dragover', function (e) {
+            e.preventDefault();
+        }).on('drop', function (e) {
+            e.preventDefault();
+            var reader = new FileReader();
+            reader.onload = function () {
+                try {
+                    var data = JSON.parse(reader.result);
+                    if (data.head) {
+                        if (data.samples && data.timestamps) {
+                            draw(data);
+                        } else {
+                            throw new Error("不支持的版本");
+                        }
+
+                    } else {
+                        throw new Error("格式不支持");
+                    }
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+            reader.readAsText(e.originalEvent.dataTransfer.files[0]);
+        })
+    })
+
+
+    $.getJSON("sample.cpuprofile", draw);
+
+    function draw(result) {
 
         var PATH_CACHE = {};
         var CLEANUP = null;
@@ -168,7 +218,7 @@
             return false;
         })
 
-    })
+    }
 </script>
 <form>
     <button id="prev">prev</button>
