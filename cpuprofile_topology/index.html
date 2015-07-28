@@ -2,7 +2,8 @@
 <html lang="zh-cn">
 <head>
     <meta charset="UTF-8">
-    <title>CPU Profile Topology</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OneProfile</title>
     <link rel="stylesheet" href="../lib/vis.css">
     <script src="../lib/jquery-2.1.4.min.js"></script>
     <script src="../lib/underscore-min.js"></script>
@@ -14,26 +15,49 @@
 
         #drop {
             text-align: center;
-            border: 4px dashed #999999;
             background: #cccccc;
             z-index: 1;
-            font-size: 2em;
+            font-size: 1.5em;
             color: #999999;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
 
         body {
-            padding: 0;
+            padding: 2px;
             margin: 0;
         }
 
         #topology {
-            box-shadow: 0 0 10px black;
-            margin: 10px 0;
+            margin: 0 0 10px 0;
+            border-left: 1px solid #cccccc;
+            border-right: 1px solid #cccccc;
+            box-shadow: 0px 4px 4px #cccccc;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        button {
+            font-size: 1.5em;
+        }
+
+        h1,h2,h3 {
+            margin: 0;
+            color: #aaaaaa;
+        }
+
+        footer {
+            color: #aaaaaa;
+            text-align: center;
+        }
+
+        a {
+            color: #042662;
         }
     </style>
 </head>
 <body>
-<div id="drop">把 .cpuprofile 文件拖到这儿</div>
+<div id="drop">把 .cpuprofile 文件拖到这里</div>
 <div id="topology">
     <img src="../lib/indicator_medium.gif" alt="加载中"/>
 </div>
@@ -226,5 +250,9 @@
     <span id="time_text"></span>
     <input id="time" type="range" step="1" style="width: 100%"/>
 </form>
+<footer>
+    2015 MIT License <a target="_blank"
+        href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">OneProfile on Github</a>
+</footer>
 </body>
 </html>
