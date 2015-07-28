@@ -15,12 +15,11 @@
 
         #drop {
             text-align: center;
-            background: #cccccc;
             z-index: 1;
             font-size: 1.5em;
-            color: #999999;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            margin: -2px 0 10px;
         }
 
         body {
@@ -32,16 +31,15 @@
             margin: 0 0 10px 0;
             border-left: 1px solid #cccccc;
             border-right: 1px solid #cccccc;
-            box-shadow: 0px 4px 4px #cccccc;
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
+            box-shadow: 0 0 4px #cccccc;
+            border-radius: 4px;
         }
 
         button {
             font-size: 1.5em;
         }
 
-        h1,h2,h3 {
+        h1, h2, h3 {
             margin: 0;
             color: #aaaaaa;
         }
@@ -57,7 +55,9 @@
     </style>
 </head>
 <body>
-<div id="drop">把 .cpuprofile 文件拖到这里</div>
+<div id="drop">
+    把 .cpuprofile 文件拖到这里<br/>
+</div>
 <div id="topology">
     <img src="../lib/indicator_medium.gif" alt="加载中"/>
 </div>
@@ -66,21 +66,32 @@
 
     $(function () {
 
+        $(window).on('dragenter', function () {
+            $("#drop").css({
+                background: "orange"
+            })
+        })
+
         $("#drop").on('dragover', function (e) {
             e.preventDefault();
         }).on('drop', function (e) {
             e.preventDefault();
             var reader = new FileReader();
+            var file = e.originalEvent.dataTransfer.files[0];
+
             reader.onload = function () {
                 try {
                     var data = JSON.parse(reader.result);
                     if (data.head) {
                         if (data.samples && data.timestamps) {
                             draw(data);
+                            $("#drop").css({
+                                background: "white"
+                            })
+                            $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
                         } else {
                             throw new Error("不支持的版本");
                         }
-
                     } else {
                         throw new Error("格式不支持");
                     }
@@ -88,7 +99,8 @@
                     alert(e.message);
                 }
             }
-            reader.readAsText(e.originalEvent.dataTransfer.files[0]);
+
+            reader.readAsText(file);
         })
     })
 
@@ -252,7 +264,8 @@
 </form>
 <footer>
     2015 MIT License <a target="_blank"
-        href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">OneProfile on Github</a>
+                        href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">OneProfile
+    on Github</a>
 </footer>
 </body>
 </html>
