@@ -55,7 +55,7 @@
     </style>
     <script>
         var _hmt = _hmt || [];
-        (function() {
+        (function () {
             var hm = document.createElement("script");
             hm.src = "//hm.baidu.com/hm.js?39894b3d435972553d92a793e4fbeebb";
             var s = document.getElementsByTagName("script")[0];
@@ -83,6 +83,8 @@
         $("#drop").on('dragover', function (e) {
             e.preventDefault();
         }).on('drop', function (e) {
+            _hmt && _hmt.push(['_trackEvent', 'events', 'drop']);
+
             e.preventDefault();
             var reader = new FileReader();
             var file = e.originalEvent.dataTransfer.files[0];
@@ -97,6 +99,8 @@
                                 background: "white"
                             })
                             $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
+
+                            _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
                         } else {
                             throw new Error("不支持的版本");
                         }
@@ -105,6 +109,8 @@
                     }
                 } catch (e) {
                     alert(e.message);
+
+                    _hmt && _hmt.push(['_trackEvent', "events", 'draw_error', file.name, file.size]);
                 }
             }
 
@@ -215,7 +221,7 @@
 
         var options = {
             width: "95%",
-            height: (window.innerHeight - $("#drop").outerHeight() - $("#control").outerHeight()-40) + "px",
+            height: (window.innerHeight - $("#drop").outerHeight() - $("#control").outerHeight() - 40) + "px",
             layout: {
                 hierarchical: {
                     enabled: true
