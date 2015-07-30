@@ -93,7 +93,7 @@
                 try {
                     var data = JSON.parse(reader.result);
                     if (data.head) {
-                        if (data.samples && data.timestamps) {
+                        if (data.samples) {
                             draw(data);
                             $("#drop").css({
                                 background: "white"
@@ -142,7 +142,15 @@
         function traverse(node, vis_nodes, vis_edges, paths) {
 
             if (!vis_nodes.get(node.callUID)) {
-                var isDeopt = node.deoptReason !== "no reason" && node.deoptReason.length > 0;
+
+                var isDeopt;
+
+                if (node.deoptReason) {
+                    isDeopt = node.deoptReason !== "no reason" && node.deoptReason.length > 0;
+                } else if (node.bailoutReason) {
+                    isDeopt = node.bailoutReason !== "no reason" && node.bailoutReason.length > 0;
+                }
+
 
                 var node_def = {
                     id: node.callUID,
@@ -163,7 +171,7 @@
                 }
 
                 if (isDeopt) {
-                    node_def.title = node.deoptReason;
+                    node_def.title = node.deoptReason || node.bailoutReason;
                     node_def.color.border = DEOPT_COLOR;
                     node_def.color.background = DEOPT_COLOR;
                     node_def.borderWidth = 2;
@@ -184,7 +192,7 @@
             if (node.children) {
                 for (var i = 0; i < node.children.length; i++) {
                     var child = node.children[i];
-                    var id = node.callUI + "-" + child.callUID;
+                    var id = node.callUID + "-" + child.callUID;
                     var exist = vis_edges.get(id);
 
                     if (!exist) {
@@ -232,38 +240,41 @@
         var network = new vis.Network(container, data, options);
 
         $("#time").attr({
-            min: result.timestamps[0],
-            max: result.timestamps[result.timestamps.length - 1],
-        }).mousemove(_.throttle(mousemove_handler, 10)).trigger('mousemove');
-
-
-        var LAST_SELECTED = 0;
+            min: 0,
+            max: result.samples.length - 1,
+        }).mousemove(_.throttle(mousemove_handler, 50)).trigger('mousemove');
 
         function mousemove_handler() {
             var selected = $("#time").val();
-            for (var i = 0; i < result.timestamps.length; i++) {
-                if (selected <= result.timestamps[i]) {
-                    $("#time_text").text("time:" + (result.timestamps[i] - result.timestamps[0]) / 1E3 + "  ms active_path:" + result.samples[i]);
-                    network.selectNodes(PATH_CACHE[result.samples[i]]);
-                    LAST_SELECTED = i;
-                    break;
-                }
+            var active_nodes = PATH_CACHE[result.samples[selected]];
+
+            if (!active_nodes) {
+                console.warn("Path[%d] is not found in %o, with  %o", selected, PATH_CACHE, result.samples);
+                return;
             }
+
+            if (result.timestamps) {
+                var time_diff = result.timestamps[selected] / 1E3 - result.startTime * 1E3;
+                $("#time_text").text(time_diff.toFixed(1) + ' ms');
+            } else {
+                $("#time_text").text(selected);
+            }
+
+            network.selectNodes(active_nodes);
         }
 
         $("#next").click(function () {
-            if (LAST_SELECTED < result.timestamps.length - 1) {
-                $("#time").val(result.timestamps[LAST_SELECTED + 1]);
-                $("#time").trigger("mousemove")
+            var current = parseInt($("#time").val());
+            if ($("#time").attr('max') > current + 1) {
+                $("#time").val(current + 1).trigger('mousemove');
             }
-
             return false;
         })
 
         $("#prev").click(function () {
-            if (LAST_SELECTED > 0) {
-                $("#time").val(result.timestamps[LAST_SELECTED - 1]);
-                $("#time").trigger("mousemove")
+            var current = parseInt($("#time").val());
+            if (current > 0) {
+                $("#time").val(current - 1).trigger('mousemove');
             }
             return false;
         })
