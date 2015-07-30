@@ -116,19 +116,49 @@
 
             reader.readAsText(file);
         })
+
+        $("#next").click(function () {
+            var current = parseInt($("#time").val());
+            if ($("#time").attr('max') > current + 1) {
+                $("#time").val(current + 1).trigger('mousemove');
+            }
+            return false;
+        })
+
+        $("#prev").click(function () {
+            var current = parseInt($("#time").val());
+            if (current > 0) {
+                $("#time").val(current - 1).trigger('mousemove');
+            }
+            return false;
+        })
+
+        $("#time").mousemove(_.throttle(mousemove_handler, 50)).trigger('mousemove');
+
     })
 
+    var network;
+    var result;
+    var PATH_CACHE = {};
 
     $.getJSON("sample.cpuprofile", draw);
 
-    function draw(result) {
+    function draw(json) {
 
-        var PATH_CACHE = {};
-        var CLEANUP = null;
+        result = json;
+
+        PATH_CACHE = {};
+
         var INACTIVE_COLOR = "#999999";
         var ACTIVE_COLOR = "blue";
         var SYSTEM_COLOR = "black";
         var DEOPT_COLOR = "#E54D4F";
+
+
+        $("#time").attr({
+            min: 0,
+            max: result.samples.length - 1,
+        });
 
         /**
          *
@@ -237,48 +267,38 @@
             }
         };
 
-        var network = new vis.Network(container, data, options);
 
-        $("#time").attr({
-            min: 0,
-            max: result.samples.length - 1,
-        }).mousemove(_.throttle(mousemove_handler, 50)).trigger('mousemove');
-
-        function mousemove_handler() {
-            var selected = $("#time").val();
-            var active_nodes = PATH_CACHE[result.samples[selected]];
-
-            if (!active_nodes) {
-                console.warn("Path[%d] is not found in %o, with  %o", selected, PATH_CACHE, result.samples);
-                return;
-            }
-
-            if (result.timestamps) {
-                var time_diff = result.timestamps[selected] / 1E3 - result.startTime * 1E3;
-                $("#time_text").text(time_diff.toFixed(1) + ' ms');
-            } else {
-                $("#time_text").text(selected);
-            }
-
-            network.selectNodes(active_nodes);
+        if (nodes.length > 500) {
+            console.info('Physics is turned off because there are more than %d nodes.', nodes.length);
+            options.physics = false;
         }
 
-        $("#next").click(function () {
-            var current = parseInt($("#time").val());
-            if ($("#time").attr('max') > current + 1) {
-                $("#time").val(current + 1).trigger('mousemove');
-            }
-            return false;
-        })
+        network = new vis.Network(container, data, options);
 
-        $("#prev").click(function () {
-            var current = parseInt($("#time").val());
-            if (current > 0) {
-                $("#time").val(current - 1).trigger('mousemove');
-            }
-            return false;
-        })
+    }
 
+    function mousemove_handler() {
+        var selected = parseInt($("#time").val());
+
+        if (!result) {
+            return;
+        }
+
+        var active_nodes = PATH_CACHE[result.samples[selected]];
+
+        if (!active_nodes) {
+            console.warn("Path[%d] is not found in %o, with  %o", selected, PATH_CACHE, result.samples);
+            return;
+        }
+
+        if (result.timestamps) {
+            var time_diff = result.timestamps[selected] / 1E3 - result.startTime * 1E3;
+            $("#time_text").text(time_diff.toFixed(1) + ' ms');
+        } else {
+            $("#time_text").text(selected);
+        }
+
+        network.selectNodes(active_nodes);
     }
 </script>
 <div id="control">
