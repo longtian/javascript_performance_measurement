@@ -27,4 +27,3 @@ build/Release
 node_modules
 
 .idea
-heap_snapshot/sample.heapsnapshot

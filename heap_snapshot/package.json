@@ -1,0 +1,12 @@
+{
+  "name": "heap_snapshot_demo",
+  "version": "0.0.1",
+  "description": "use heapdump to create heap snapshot",
+  "main": "index.js",
+  "scripts": {},
+  "author": "wyvernnot",
+  "license": "MIT",
+  "dependencies": {
+    "heapdump": "^0.3.6"
+  }
+}

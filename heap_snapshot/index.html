@@ -1,39 +1,152 @@
 <html>
 <head>
-    <title>Dad</title>
+    <title>OneHeap</title>
 </head>
-
 <body>
-<h1 id="count"></h1>
-<button onclick="dad.children.push(new People());updateUI()">ADD</button>
+<p>请耐心等待</p>
+<div id="root"></div>
 </body>
+<script src="../lib/jquery-2.1.4.min.js"></script>
+<script src="../lib/vis.min.js"></script>
+<script src="../lib/underscore-min.js"></script>
 <script type="text/javascript">
-    function People() {
-        this.children = [];
-        this.id = (new Array(1E4)).join("*")
-    }
+    $.getJSON("sample.heapsnapshot", function (root) {
 
-    var dad = new People();
+        var NAMING = {
+            NODE_FIELDS: _.invert(root.snapshot.meta.node_fields),
+            EDGE_FIELDS: _.invert(root.snapshot.meta.edge_fields),
+            NODE_TYPES: _.invert(root.snapshot.meta.node_types[0]),
+            EDGE_TYPES: _.invert(root.snapshot.meta.edge_types[0])
+        }
 
-    function updateUI() {
-        document.getElementById('count').innerHTML = 1 + dad.children.length;
-    }
+        console.log("root:%o NAMING:%o", root, NAMING);
 
-    // x10
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
-    dad.children.push(new People());
+        var n = root.nodes;
+        var s = root.strings;
+        var e = root.edges;
 
-    updateUI();
+        var nodes = [];
+        var edges = [];
+        var groups = {}
 
+        var NODES_MAP = window.N = {}
+        var EDGES_ARRAY = [];
+
+        var edge_offset = 0;
+
+        for (var i = 0; i < n.length; i += root.snapshot.meta.node_fields.length) {
+            var i_type = n[i];
+            var i_name = s[n[i + 1]];
+            var i_id = n[i + 2];
+            var i_size = n[i + 3]
+            var i_edge_count = n[i + 4];
+
+            var node = {
+                id: i_id,
+                group: i_type,
+                label: i_id + ":" + i_name,
+                shape: 'dot'
+            }
+
+            var edge_fields_length = root.snapshot.meta.edge_fields.length;
+
+            for (var j = 0; j < i_edge_count; j++) {
+                var base = edge_offset + j * edge_fields_length;
+                var e_type = e[base];
+                var e_prop = e[base + 1];
+                var e_to = e[base + 2];
+                var e_found = {
+                    id: base,
+                    from: i_id,
+                    group: e_type,
+                    prop: e_prop,
+                    to: n[e_to + 2],
+                    arrows: 'to',
+                };
+                EDGES_ARRAY.push(e_found);
+            }
+
+            edge_offset += edge_fields_length * i_edge_count;
+            NODES_MAP[i_id] = node;
+        }
+
+        /**
+         * hidden: "0"
+         * array: "1"
+         * string: "2"
+         * object: "3"
+         * code: "4"
+         * closure: "5"
+         * regexp: "6"
+         * number: "7"
+         * native: "8"
+         * synthetic: "9"
+         */
+        var a = _.filter(NODES_MAP, function (n) {
+
+            if ([3, 8, 9].indexOf(n.group) !== -1) {
+                return true;
+            }
+
+            if (n.id < 32) {
+                return true;
+            }
+
+        })
+
+        var node_id = _.map(a, function (i) {
+            return i.id
+        });
+
+        var es = _.filter(EDGES_ARRAY, function (i) {
+
+            if (_.indexOf(node_id, i.from) !== -1) {
+                return true;
+            } else if (_.indexOf(node_id, i.to) !== -1) {
+                return true;
+            }
+
+            return false;
+        })
+
+        /**
+         * context: "0"
+         * element: "1"
+         * hidden: "4"
+         * internal: "3"
+         * property: "2"
+         * shortcut: "5"
+         * weak: "6"
+         */
+        es = _.where(es, {
+            group: 2
+        });
+
+        // create a network
+        var container = document.getElementById('root');
+        var data = {
+            nodes: a,
+            edges: es
+        };
+
+        var options = {
+            groups: {
+                6: {
+                    color: "red"
+                },
+                8: {
+                    color: "pink"
+                },
+                9: {
+                    color: "gray"
+                }
+            }
+        };
+
+        console.log('drawing');
+
+        var network = new vis.Network(container, data, options);
+    });
 
 </script>
-
 </html>

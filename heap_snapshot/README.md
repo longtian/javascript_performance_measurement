@@ -1,8 +1,14 @@
 # snapshot 数据结构解读
 
-运行代码 `index.html`，创建 Snapshot。
-
 ![heapsnapshot](./devtools_heapsnapshot_screenshot.png)
+
+## Using Heapdump
+
+[https://github.com/bnoordhuis/node-heapdump](https://github.com/bnoordhuis/node-heapdump)
+
+## Using Chrome Dev Tools
+
+运行代码 `index.html`，创建 Snapshot。
 
 随便找一个数字例如 `206751`，在 `nodes.json` 中查找 `206751` ，定位到这行
 
