@@ -1,9 +1,21 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh-cn">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OneHeap</title>
+    <link rel="stylesheet" href="../lib/vis.css">
+    <style>
+        #root {
+            height: 600px;
+            border: 1px solid;
+        }
+    </style>
 </head>
 <body>
-<p>请耐心等待</p>
+<p id="tips">请耐心等待
+    <progress id="progress"></progress>
+</p>
 <div id="root"></div>
 </body>
 <script src="../lib/jquery-2.1.4.min.js"></script>
@@ -12,29 +24,49 @@
 <script type="text/javascript">
     $.getJSON("sample.heapsnapshot", function (root) {
 
-        var NAMING = {
-            NODE_FIELDS: _.invert(root.snapshot.meta.node_fields),
-            EDGE_FIELDS: _.invert(root.snapshot.meta.edge_fields),
-            NODE_TYPES: _.invert(root.snapshot.meta.node_types[0]),
-            EDGE_TYPES: _.invert(root.snapshot.meta.edge_types[0])
+        console.time('process_data');
+
+        /**
+         * invert key and value of an array of string
+         *
+         * ["a","b","c"] => {
+         *   "a":0,
+         *   "b":1,
+         *   "c":2
+         * }
+         *
+         **/
+        function key_invert(arr) {
+            var ret = {};
+            for (var i = 0; i < arr.length; i++) {
+                ret[arr[i]] = i;
+            }
+            return ret;
         }
 
-        console.log("root:%o NAMING:%o", root, NAMING);
+
+        var META = root.snapshot.meta;
+        var NAMING = {
+            NODE_FIELDS: key_invert(META.node_fields),
+            EDGE_FIELDS: key_invert(META.edge_fields),
+            NODE_TYPES: key_invert(META.node_types[0]),
+            EDGE_TYPES: key_invert(META.edge_types[0])
+        }
+        var EDGE_FIELDS_LENGTH = META.edge_fields.length;
+
+        console.debug("root: %o meta: %o NAMING: %o",
+                root, root.snapshot.meta, NAMING);
 
         var n = root.nodes;
         var s = root.strings;
         var e = root.edges;
 
-        var nodes = [];
-        var edges = [];
-        var groups = {}
-
         var NODES_MAP = window.N = {}
-        var EDGES_ARRAY = [];
+        var EDGES_ARRAY = window.E = [];
 
         var edge_offset = 0;
 
-        for (var i = 0; i < n.length; i += root.snapshot.meta.node_fields.length) {
+        for (var i = 0; i < n.length; i += META.node_fields.length) {
             var i_type = n[i];
             var i_name = s[n[i + 1]];
             var i_id = n[i + 2];
@@ -44,29 +76,40 @@
             var node = {
                 id: i_id,
                 group: i_type,
-                label: i_id + ":" + i_name,
+                label: i_name + "@" + i_id,
                 shape: 'dot'
             }
 
-            var edge_fields_length = root.snapshot.meta.edge_fields.length;
-
             for (var j = 0; j < i_edge_count; j++) {
-                var base = edge_offset + j * edge_fields_length;
+                var base = edge_offset + j * EDGE_FIELDS_LENGTH;
                 var e_type = e[base];
-                var e_prop = e[base + 1];
+                var e_prop;
                 var e_to = e[base + 2];
+
+                /**
+                 * @link https://github.com/joyent/node/blob/d13d7f74d794340ac5e126cfb4ce507fe0f803d5/deps/v8/src/heap-snapshot-generator.cc#L2874
+                 **/
+
+                if (e_type === 1 || e_type === 4) {
+                    e_prop = "[" + e[base + 1] + "]";
+                } else {
+                    e_prop = s[e[base + 1]];
+                }
+
                 var e_found = {
                     id: base,
                     from: i_id,
-                    group: e_type,
-                    prop: e_prop,
                     to: n[e_to + 2],
+                    group: e_type,
                     arrows: 'to',
+                    title: META.edge_types[0][e_type],
+                    label: e_prop
                 };
+
                 EDGES_ARRAY.push(e_found);
             }
 
-            edge_offset += edge_fields_length * i_edge_count;
+            edge_offset += EDGE_FIELDS_LENGTH * i_edge_count;
             NODES_MAP[i_id] = node;
         }
 
@@ -82,9 +125,11 @@
          * native: "8"
          * synthetic: "9"
          */
-        var a = _.filter(NODES_MAP, function (n) {
 
-            if ([3, 8, 9].indexOf(n.group) !== -1) {
+        var count = 0;
+        var nodes = _.filter(NODES_MAP, function (n) {
+
+            if ([8, 9].indexOf(n.group) !== -1) {
                 return true;
             }
 
@@ -94,11 +139,11 @@
 
         })
 
-        var node_id = _.map(a, function (i) {
+        var node_id = _.map(nodes, function (i) {
             return i.id
         });
 
-        var es = _.filter(EDGES_ARRAY, function (i) {
+        var edges = _.filter(EDGES_ARRAY, function (i) {
 
             if (_.indexOf(node_id, i.from) !== -1) {
                 return true;
@@ -109,6 +154,18 @@
             return false;
         })
 
+
+//        es = _.where(es, {
+//            group: 2
+//        });
+
+        // create a network
+        var container = document.getElementById('root');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+
         /**
          * context: "0"
          * element: "1"
@@ -118,17 +175,6 @@
          * shortcut: "5"
          * weak: "6"
          */
-        es = _.where(es, {
-            group: 2
-        });
-
-        // create a network
-        var container = document.getElementById('root');
-        var data = {
-            nodes: a,
-            edges: es
-        };
-
         var options = {
             groups: {
                 6: {
@@ -143,9 +189,19 @@
             }
         };
 
-        console.log('drawing');
+        console.timeEnd('process_data');
+
+        console.info('rendering %d nodes and %d egdes', nodes.length, edges.length);
 
         var network = new vis.Network(container, data, options);
+
+        network.on('stabilizationProgress', function (e) {
+            $("#progress").val(e.iterations / e.total);
+        });
+
+        network.on('stabilizationIterationsDone', function (e) {
+            $("#tips").hide();
+        });
     });
 
 </script>
