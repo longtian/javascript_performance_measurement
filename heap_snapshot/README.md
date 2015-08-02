@@ -45,9 +45,9 @@ JavaScript 运行过程中的大部分数据都保存在堆 (Heap) 中，所以 
 
 3\. `edges` 属性保存了结点间的映射关系，对应 v8 源码的 [`HeapGraphEdge`](https://github.com/joyent/node/blob/master/deps/v8/include/v8-profiler.h#L183)
 
-4\. `strings` 保存了所有的字符串， `nodes` 和 `edges` 中不会直接存 string，而是存索引
+4\. `strings` 保存了所有的字符串， `nodes` 和 `edges` 中不会直接存字符串，而是存了字符串在 `strings` 中的索引
 
-堆快照其实是一个图的数据结构，但是 `.heapsnapshot` 文件在存储的过程中使用了数组来存储图的结构，这一设计十分巧妙而且减少了所需磁盘空间的大小。
+堆快照其实是一个有向图的数据结构，但是 `.heapsnapshot` 文件在存储的过程中使用了数组来存储图的结构，这一设计十分巧妙而且减少了所需磁盘空间的大小。
 
 ### nodes 属性
 
@@ -101,7 +101,7 @@ nodes 是一个很长一维的数组，但是为了阅读方便，v8 在序列�
 |5|shortcut|A link that must not be followed during sizes calculation.
 |6|weak|A weak reference (ignored by the GC).
 
-**nodes 和 edges** 的对应关系
+**nodes 和 edges 的对应关系**
 
 如果知道某个结点的 id，是没有办法直接从 `edges` 中查出和它相邻的点的，因为 `edges` 并不是一个 `from-to` 的 Hash。想知道从一个结点出发
 可到达那些结点，需要遍历一次 `nodes`。
@@ -110,7 +110,7 @@ nodes 是一个很长一维的数组，但是为了阅读方便，v8 在序列�
 
 1\. 在遍历 `nodes` 前初始化一个变量 `edge_offset`，初始值是0，每遍历一个结点都会改变它的值。
 
-2.\ 遍历某个结点 Nx 的过程中，从 Nx 出发一共有 `edge_count` 条 Edge
+2\. 遍历某个结点 Nx 的过程中：
 
 从 Nx 出发的第一条 Edge
 
@@ -128,12 +128,14 @@ edges[ edge_offset + 3 ]
 edges[ edge_offset + 5 ]
 ```
 
+从 Nx 出发，一共有 `edge_count` 条 Edge 
+
 ...
 
-3\. 每遍历完一个结点，就在 `edge_offset` 上加 ` 3 x edge_count `,回到 2
+3\. 每遍历完一个结点，就在 `edge_offset` 上加 ` 3 x edge_count `，并回到步骤 2，直到所有结点都遍历完
 
 
-用伪代码表示就是：
+步骤1到3 用伪代码表示就是：
 
 ```
 edge_offset=0
@@ -141,66 +143,35 @@ edge_offset=0
 // 遍历每一个结点
 for(node in nodes){
  
-  // edges 下标从 edge_offset 到 edge_offset + 3xedge_count 都是 node 可以到达的点
+  // edges 下标从 edge_offset 到 edge_offset + 3 x edge_count 都是 node 可以到达的点
   edge_offset+= 3 x node.edge_count
 }
 ```
 
+以上就是 `.heapsnapshot` 的文件格式定义了，基于这些发现，在结合一个前端绘图的库，就可以可视化的展示 Heap Snapshot 了。
+
 ## 有趣的点
+
+**@1**
+
+![root](./images/root.png)
 
 **MathConstructor**
 
 ![Math](./images/math.png)
 
-```js
-
-  // Instance class name can only be set on functions. That is the only
-  // purpose for MathConstructor.
-  function MathConstructor() {}
-  var $Math = new MathConstructor();
-  
-  ......
-
-  // Set up math constants.
-  InstallConstants($Math, $Array(
-    // ECMA-262, section 15.8.1.1.
-    "E", 2.7182818284590452354,
-    // ECMA-262, section 15.8.1.2.
-    "LN10", 2.302585092994046,
-    // ECMA-262, section 15.8.1.3.
-    "LN2", 0.6931471805599453,
-    // ECMA-262, section 15.8.1.4.
-    "LOG2E", 1.4426950408889634,
-    "LOG10E", 0.4342944819032518,
-    "PI", 3.1415926535897932,
-    "SQRT1_2", 0.7071067811865476,
-    "SQRT2", 1.4142135623730951
-  ));
-```
+[v8源码](https://github.com/joyent/node/blob/master/deps/v8/src/math.js#L380)
 
 **正则表达式**
 
 ![Regexp](./images/regexp.png)
 
-**流处理**
+所有的正则表达式实例的 `__proto__` 都指向 RegExp 构造函数，同时 RegExp 的 `__proto__` 又指向 Object
+
+**Stream**
 
 ![Stream](./images/stream_inherit.png)
 
 在 Node.JS 中和 Stream 相关的几个类的设计和 `Java` 类似，都使用到装饰器的设计模式，层层嵌套。
 
-例如 `Passthrough` 继承自 `Transform`，这部分的源码如下：
-
-```js
-var Transform = require('_stream_transform');
-var util = require('util');
-util.inherits(PassThrough, Transform);
-
-function PassThrough(options) {
-  if (!(this instanceof PassThrough))
-    return new PassThrough(options);
-
-  Transform.call(this, options);
-}
-```
-
-通过可视化，可以很方便地找到这个继承关系。
+[v8源码](https://github.com/joyent/node/blob/master/lib/_stream_writable.js#L159)
