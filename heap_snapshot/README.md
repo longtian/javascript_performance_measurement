@@ -156,6 +156,16 @@ for(node in nodes){
 
 ![root](./images/root.png)
 
+**Objects**
+
+*最密集的那部分的中心是 Object 构造函数*
+
+![root](./images/objects.png)
+
+*如果把 Object 和 Array 构造函数隐藏*
+
+![root](./images/no_objects.png)
+
 **MathConstructor**
 
 ![Math](./images/math.png)
