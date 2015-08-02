@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dog Demo</title>
+    <style>
+        script {
+            display: block;
+        }
+
+        pre {
+            background: #cccccc;
+        }
+    </style>
+</head>
+<body>
+<h6>1. 将运行的代码</h6>
+<pre><script type="text/javascript">
+
+    function Dog(name) {
+        this.name = new RegExp(name);
+        this.profile = (new Array(1024)).join('*');
+        this.age = Math.floor(Math.random() * 20);
+    }
+
+    function Owner() {
+        this.name = new RegExp(name);
+    }
+
+    var owner = new Owner('wyvernnot');
+
+    (function () {
+        var dog1 = new Dog('baozi');
+        var dog2 = new Dog('youtiao');
+        owner.dogs = [dog1, dog2];
+    })();
+
+
+</script></pre>
+<h6>2. 现在，可以使用 Chrome Dev Tools 生成快照了</h6>
+</body>
+</html>

@@ -76,8 +76,7 @@
             var node = {
                 id: i_id,
                 group: i_type,
-                label: i_name + "@" + i_id,
-                shape: 'dot'
+                label: i_name + "\n@" + i_id
             }
 
             for (var j = 0; j < i_edge_count; j++) {
@@ -101,7 +100,7 @@
                     from: i_id,
                     to: n[e_to + 2],
                     group: e_type,
-                    arrows: 'to',
+                    arrows: 'middle',
                     title: META.edge_types[0][e_type],
                     label: e_prop
                 };
@@ -129,7 +128,7 @@
         var count = 0;
         var nodes = _.filter(NODES_MAP, function (n) {
 
-            if ([8, 9].indexOf(n.group) !== -1) {
+            if ([3, 6, 7, 8, 9].indexOf(n.group) !== -1) {
                 return true;
             }
 
@@ -176,18 +175,65 @@
          * weak: "6"
          */
         var options = {
-            groups: {
-                6: {
-                    color: "red"
+            nodes: {
+                size: 10,
+                shape: "dot"
+            },
+            edges: {
+                color: {
+                    color: "#9e9e9e",
+                    inherit: "to"
                 },
-                8: {
-                    color: "pink"
-                },
-                9: {
-                    color: "gray"
+                font: {
+                    color: "#9e9e9e"
                 }
             }
         };
+
+        /**
+         * hidden: "0"
+         * array: "1"
+         * string: "2"
+         * object: "3"
+         * code: "4"
+         * closure: "5"
+         * regexp: "6"
+         * number: "7"
+         * native: "8"
+         * synthetic: "9"
+         */
+        options.groups = {};
+
+        options.groups[NAMING.NODE_TYPES["regexp"]] = {
+            color: "#dd8482",
+            font: {
+                color: "#dd8482"
+            },
+            shape: "dot",
+            size: 2
+        }
+
+        options.groups[NAMING.NODE_TYPES["number"]] = {
+            color: "#442ed5",
+            font: {
+                color: "#442ed5"
+            },
+            size: 5
+        }
+
+        options.groups[NAMING.NODE_TYPES["native"]] = {
+            color: "#c4c4c4",
+            font: {
+                color: "#c4c4c4"
+            }
+        }
+
+        options.groups[NAMING.NODE_TYPES["synthetic"]] = {
+            color: "pink",
+            font: {
+                color: "pink"
+            }
+        }
 
         console.timeEnd('process_data');
 
