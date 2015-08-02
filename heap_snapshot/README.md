@@ -25,9 +25,9 @@ JavaScript 性能分析另一个比较重要的方面是内存分析。JavaScrip
 使用 Chrome 打开 [测试页面](http://wyvernnot.github.io/javascript_performance_measurement/heap_snapshot/dog.html)
 按 F12 打开 `Devtools`，切换到 `Profiles` 页，选择 `Take Heap Snapshot`。稍等片刻，在生成的 `Snapshot` 上点击右键可以导出，文件后缀一般是 `.heapsnapshot`。
 
-**后端**
+**Node.JS**
 
-如果你是 Node.JS 工程师，可以安装 `headdump` 这个很有名的模块。
+如果你是 Node.JS 工程师，可以安装 `heapdump` 这个很有名的模块。
 
 [https://github.com/bnoordhuis/node-heapdump](https://github.com/bnoordhuis/node-heapdump)
 
@@ -42,8 +42,8 @@ JavaScript 性能分析另一个比较重要的方面是内存分析。JavaScrip
 
 **nodes**
 
-|------|--------------|---------------|
 |下标   |属性          |类型            |
+|------|--------------|---------------|
 |n      |type         |number         |
 |n+1    |name         |string         |
 |n+2    |id           |number         |
@@ -73,8 +73,8 @@ JavaScript 性能分析另一个比较重要的方面是内存分析。JavaScrip
 
 **edges**
 
-|------|--------------|---------------|
 |下标   |属性          |类型|
+|------|--------------|---------------|
 |n      |type         |number|
 |n+1    |name_or_index|string_or_number|
 |n+2    |to_node      |node         |
