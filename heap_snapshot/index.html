@@ -26,6 +26,13 @@
     <progress id="progress"></progress>
 </p>
 <div id="root"></div>
+<p>
+<ul>
+    <li>CTRL + 单击 ： 展开</li>
+    <li>SHIFT + 单击 ： 删除</li>
+    <li>双击 ： 切换固定</li>
+</ul>
+</p>
 </body>
 <script src="../lib/jquery-2.1.4.min.js"></script>
 <script src="../lib/vis.min.js"></script>
@@ -85,7 +92,8 @@
             var node = {
                 id: i_id,
                 group: i_type,
-                label: i_name + "\n@" + i_id
+                label: i_name + "\n@" + i_id,
+                title: META.node_types[0][i_type]
             }
 
             for (var j = 0; j < i_edge_count; j++) {
@@ -137,7 +145,7 @@
         var count = 0;
         var nodes = _.filter(NODES_MAP, function (n) {
 
-            if ([3, 6, 7, 8, 9].indexOf(n.group) !== -1) {
+            if ([6, 7, 8, 9].indexOf(n.group) !== -1) {
                 return true;
             }
 
@@ -152,26 +160,22 @@
         });
 
         var edges = _.filter(EDGES_ARRAY, function (i) {
-
-            if (_.indexOf(node_id, i.from) !== -1) {
+            if (_.indexOf(node_id, i.from) !== -1 && _.indexOf(node_id, i.to) !== -1) {
                 return true;
-            } else if (_.indexOf(node_id, i.to) !== -1) {
-                return true;
+            } else {
+                return false;
             }
-
-            return false;
         })
-
-
-//        es = _.where(es, {
-//            group: 2
-//        });
 
         // create a network
         var container = document.getElementById('root');
+
+        var nodeDS = new vis.DataSet(nodes);
+        var edgeDS = new vis.DataSet(edges);
+
         var data = {
-            nodes: nodes,
-            edges: edges
+            nodes: nodeDS,
+            edges: edgeDS
         };
 
         /**
@@ -196,9 +200,6 @@
                 font: {
                     color: "#9e9e9e"
                 }
-            },
-            manipulation: {
-                enabled: true
             }
         };
 
@@ -260,6 +261,63 @@
         network.on('stabilizationIterationsDone', function (e) {
             $("#tips").hide();
         });
+
+        network.on('click', clickHandler);
+
+        network.on('doubleClick', function (e) {
+            _.each(e.nodes, function (id) {
+                var n = nodeDS.get(id);
+                n.physics = !n.physics
+                nodeDS.update(n);
+
+            })
+        })
+
+        function clickHandler(e) {
+            if (e.event && e.event.pointers && e.event.pointers[0].ctrlKey) {
+                addNodeHandler(e);
+            } else if (e.event && e.event.pointers && e.event.pointers[0].shiftKey) {
+                removeNodeHandler(e);
+            }
+        }
+
+        function removeNodeHandler(e) {
+            _.each(e.nodes, function (id) {
+
+                if (nodeDS.get(id)) {
+                    nodeDS.remove(id);
+                }
+
+                var edges = _.filter(EDGES_ARRAY, function (edge) {
+                    return edge.from == id || edge.to == id;
+                }).map(function (edge) {
+                    return edge.id;
+                });
+
+                edgeDS.remove(edges);
+
+            });
+        }
+
+        function addNodeHandler(e) {
+            _.each(e.nodes, function (id) {
+
+                var edges = _.where(EDGES_ARRAY, {
+                    from: parseInt(id)
+                });
+
+                _.each(edges, function (edge) {
+                    if (!nodeDS.get(edge.to)) {
+                        nodeDS.add(NODES_MAP[edge.to]);
+                    }
+                    if (!edgeDS.get(edge.id)) {
+                        edgeDS.add(edge);
+                    }
+                });
+
+            });
+        }
+
     });
 
 </script>
