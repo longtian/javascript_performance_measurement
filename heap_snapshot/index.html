@@ -50,17 +50,16 @@
         try {
             var data = JSON.parse(result);
             if (data.snapshot) {
-                if (data.samples) {
-                    draw(data);
-                    $("#drop").css({
-                        background: "white"
-                    })
-                    $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
+                draw(data);
+                
+                $("#drop")
+                        .css({
+                            background: "white"
+                        })
+                        .text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
 
-                    _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
-                } else {
-                    throw new Error("不支持的版本");
-                }
+                _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
+
             } else {
                 throw new Error("格式不支持");
             }
@@ -128,7 +127,15 @@
                 id: i_id,
                 group: i_type,
                 label: i_name + "\n@" + i_id,
-                title: META.node_types[0][i_type]
+                title: META.node_types[0][i_type],
+                edge_count: i_edge_count
+            }
+
+            if (i_type === NAMING.NODE_TYPES['string']) {
+                if (i_name && i_name.length > 20) {
+                    node.label = "string[" + i_name.length + ']\n@' + i_id;
+                    node.title = i_name;
+                }
             }
 
             for (var j = 0; j < i_edge_count; j++) {
@@ -277,9 +284,9 @@
         }
 
         options.groups[NAMING.NODE_TYPES["synthetic"]] = {
-            color: "pink",
+            color: "#666666",
             font: {
-                color: "pink"
+                color: "#666666"
             }
         }
 
@@ -333,6 +340,10 @@
                 var edges = _.where(EDGES_ARRAY, {
                     from: parseInt(id)
                 });
+
+                if (edges.length > 30 && !window.confirm('确认要展开 ' + edges.length + ' 条边么？')) {
+                    return;
+                }
 
                 _.each(edges, function (edge) {
                     if (!nodeDS.get(edge.to)) {
