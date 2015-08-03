@@ -29,7 +29,8 @@
 <div id="root"></div>
 <p>
 <ul>
-    <li>CTRL + 单击 ： 展开节点</li>
+    <li>CTRL + 单击 ： 展开 to 节点</li>
+    <li>ALT  + 单击 ： 展开 from 节点</li>
     <li>CTRL + 拖拽 ： 固定节点</li>
     <li>SHIFT + 单击 ： 删除节点</li>
 </ul>
@@ -318,7 +319,9 @@
 
         function clickHandler(e) {
             if (e.event && e.event.pointers && (e.event.pointers[0].ctrlKey || e.event.pointers[0].metaKey )) {
-                addNodeHandler(e);
+                addNodeHandler(e,'from');
+            } else if (e.event && e.event.pointers && e.event.pointers[0].altKey ) {
+                addNodeHandler(e,'to');
             } else if (e.event && e.event.pointers && e.event.pointers[0].shiftKey) {
                 removeNodeHandler(e);
             }
@@ -342,21 +345,36 @@
             });
         }
 
-        function addNodeHandler(e) {
+        function addNodeHandler(e,direction) {
             _.each(e.nodes, function (id) {
 
-                var edges = _.where(EDGES_ARRAY, {
-                    from: parseInt(id)
-                });
+                if(direction==='from'){
+                    var edges = _.where(EDGES_ARRAY, {
+                        from: parseInt(id)
+                    });
+                }else{
+                    var edges = _.where(EDGES_ARRAY, {
+                        to: parseInt(id)
+                    });
+                }
+
 
                 if (edges.length > 30 && !window.confirm('确认要展开 ' + edges.length + ' 条边么？')) {
                     return;
                 }
 
                 _.each(edges, function (edge) {
-                    if (!nodeDS.get(edge.to)) {
-                        nodeDS.add(NODES_MAP[edge.to]);
+
+                    if(direction==='from'){
+                        if (!nodeDS.get(edge.to)) {
+                            nodeDS.add(NODES_MAP[edge.to]);
+                        }
+                    }else{
+                        if (!nodeDS.get(edge.from)) {
+                            nodeDS.add(NODES_MAP[edge.from]);
+                        }
                     }
+
                     if (!edgeDS.get(edge.id)) {
                         edgeDS.add(edge);
                     }
