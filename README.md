@@ -1,4 +1,4 @@
-# JavaScript Performance Measurement Toolkit
+# JavaScript Performance Measurement Visualisation Toolkit
 
 ## OneProfile
 
@@ -10,8 +10,7 @@
 
 ## OneHeap
 
-> OneHeap 和 OneProfile 类似，是用来展示 JavaScript Heap 信息的工具。
-> 这个工具现在还只是一个原型，用来验证可行性。
+> OneHeap 关注于运行中的 JavaScript 内存信息的展示，用可视化的方式还原了 HeapGraph，有助于理解 v8 内存管理。
 
 [点击打开 OneHeap](http://wyvernnot.github.io/javascript_performance_measurement/heap_snapshot/)
 
@@ -19,4 +18,16 @@
 
 ## OneGC
 
-> {placeholder}
+> // TODO
+
+------------------
+
+## 更新日志
+
+*15-7-28*
+
+发布了 OneProfile 1.0.0
+
+*15-8-3*
+
+发布了 OneHeap 1.0.0
