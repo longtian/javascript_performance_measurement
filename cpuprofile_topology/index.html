@@ -156,7 +156,7 @@
 
             paths.push(node.callUID);
 
-            PATH_CACHE[Object.keys(PATH_CACHE).length + 1] = paths.slice();
+            PATH_CACHE[node.id] = paths.slice();
 
             if (node.children) {
                 for (var i = 0; i < node.children.length; i++) {
