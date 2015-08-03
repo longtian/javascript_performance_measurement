@@ -13,6 +13,8 @@ JavaScript 运行过程中的大部分数据都保存在堆 (Heap) 中，所以 
 可以用来动态地展示 Profile 的结果，分析各种函数的调用关系。周末我用类似的思路研究了一下 `.heapsnapshot` 文件，做了这个网页小工具，把 Heap Snapshot 
 用有向图的方式展现出来。
 
+![screenshot](./images/screenshot.gif)
+
 ## OneHeap 名字的由来
 
 > There are only two hard things in Computer Science: cache invalidation and naming things. -- Phil Karlton
