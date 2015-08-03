@@ -26,9 +26,6 @@
 <div id="drop">
     把 .heapsnapshot 文件拖到这里<br/>
 </div>
-<p id="tips">请耐心等待
-    <progress id="progress"></progress>
-</p>
 <div id="root"></div>
 <p>
 <ul>
@@ -47,6 +44,7 @@
 <script src="../lib/vis.min.js"></script>
 <script src="../lib/underscore-min.js"></script>
 <script src="../common/jquery.droppable.js"></script>
+<script src="../common/track_progress.js"></script>
 <script type="text/javascript">
     $("#drop").droppable(function (file, result) {
         try {
@@ -290,14 +288,7 @@
         console.info('rendering %d nodes and %d egdes', nodes.length, edges.length);
 
         var network = new vis.Network(container, data, options);
-
-        network.on('stabilizationProgress', function (e) {
-            $("#progress").val(e.iterations / e.total);
-        });
-
-        network.on('stabilizationIterationsDone', function (e) {
-            $("#tips").hide();
-        });
+        track_progress(network);
 
         network.on('click', clickHandler);
 

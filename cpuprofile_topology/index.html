@@ -9,6 +9,7 @@
     <script src="../lib/underscore-min.js"></script>
     <script src="../lib/vis.min.js"></script>
     <script src="../common/jquery.droppable.js"></script>
+    <script src="../common/track_progress.js"></script>
     <link rel="stylesheet" href="../common/styles.css"/>
     <script>
         var _hmt = _hmt || [];
@@ -212,6 +213,7 @@
         }
 
         network = new vis.Network(container, data, options);
+        track_progress(network);
 
     }
 

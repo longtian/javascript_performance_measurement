@@ -12,7 +12,7 @@
 }
 
 body {
-    padding: 2px;
+    padding: 0;
     margin: 0;
 }
 
@@ -40,4 +40,12 @@ footer {
 
 a {
     color: #042662;
+}
+
+.progress_tracker {
+    padding: 0;
+    margin: 0;
+    height: 10px;
+    width: 100%;
+    vertical-align: top;
 }
