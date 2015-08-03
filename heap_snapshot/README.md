@@ -150,11 +150,23 @@ for(node in nodes){
 
 以上就是 `.heapsnapshot` 的文件格式定义了，基于这些发现，在结合一个前端绘图的库，就可以可视化的展示 Heap Snapshot 了。
 
-## 有趣的点
+## OneHeap 使用说明
+
+**链接地址**
+
+使用 Chrome 打开： [OneHeap](http://wyvernnot.github.io/javascript_performance_measurement/heap_snapshot/)
+
+### 一些有意思的截图
 
 **@1**
 
+Node.JS
+
 ![root](./images/root.png)
+
+Browser
+
+![dom](./images/dom.png)
 
 **Objects**
 
