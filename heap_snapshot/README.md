@@ -166,17 +166,19 @@ Node.JS
 
 ![root](./images/root.png)
 
-Browser
+*朴灵老师的《深入浅出Node.JS》有对 Buffer 的详细介绍，其中提到 Buffer 是 JavaScript 和 C++ 技术结合的典型代表*
+
+浏览器
 
 ![dom](./images/dom.png)
 
-**Objects**
+*很明显浏览器下多了 Window 和 Document 对象，而 Detached DOM tree 正是前端内存泄露的高发地。*
 
-*最密集的那部分的中心是 Object 构造函数*
+**Objects**
 
 ![root](./images/objects.png)
 
-*如果把 Object 和 Array 构造函数隐藏*
+*最密集的那部分的中心是 Object 构造函数,如果把 Object 和 Array 构造函数隐藏，就变成了下面这样*
 
 ![root](./images/no_objects.png)
 
@@ -184,7 +186,7 @@ Browser
 
 ![Math](./images/math.png)
 
-[v8源码](https://github.com/joyent/node/blob/master/deps/v8/src/math.js#L380)
+左上角是例如 `自然对数E` 这样的常量，[v8源码](https://github.com/joyent/node/blob/master/deps/v8/src/math.js#L380)
 
 **正则表达式**
 
@@ -196,9 +198,7 @@ Browser
 
 ![Stream](./images/stream_inherit.png)
 
-在 Node.JS 中和 Stream 相关的几个类的设计和 `Java` 类似，都使用到装饰器的设计模式，层层嵌套。
-
-[v8源码](https://github.com/joyent/node/blob/master/lib/_stream_writable.js#L159)
+在 Node.JS 中和 Stream 相关的几个类的设计和 `Java` 类似，都使用到装饰器的设计模式，层层嵌套, 例如 [v8源码](https://github.com/joyent/node/blob/master/lib/_stream_writable.js#L159)
 
 ### 参考资料
 
