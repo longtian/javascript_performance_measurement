@@ -300,7 +300,7 @@
         network.on('click', clickHandler);
 
         network.on('dragStart', function (e) {
-            if (e.event && e.event.pointers && e.event.pointers[0].ctrlKey) {
+            if (e.event && (e.event.pointers[0].ctrlKey || e.event.pointers[0].metaKey )) {
                 _.each(e.nodes, function (id) {
                     var n = nodeDS.get(id);
                     n.physics = false
@@ -317,7 +317,7 @@
         })
 
         function clickHandler(e) {
-            if (e.event && e.event.pointers && e.event.pointers[0].ctrlKey) {
+            if (e.event && e.event.pointers && (e.event.pointers[0].ctrlKey || e.event.pointers[0].metaKey )) {
                 addNodeHandler(e);
             } else if (e.event && e.event.pointers && e.event.pointers[0].shiftKey) {
                 removeNodeHandler(e);
