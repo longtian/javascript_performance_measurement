@@ -29,9 +29,9 @@
 <div id="root"></div>
 <p>
 <ul>
-    <li>CTRL + 单击 ： 展开</li>
-    <li>SHIFT + 单击 ： 删除</li>
-    <li>双击 ： 切换固定</li>
+    <li>CTRL + 单击 ： 展开节点</li>
+    <li>CTRL + 拖拽 ： 固定节点</li>
+    <li>SHIFT + 单击 ： 删除节点</li>
 </ul>
 </p>
 <footer>
@@ -51,7 +51,7 @@
             var data = JSON.parse(result);
             if (data.snapshot) {
                 draw(data);
-                
+
                 $("#drop")
                         .css({
                             background: "white"
@@ -299,13 +299,21 @@
 
         network.on('click', clickHandler);
 
-        network.on('doubleClick', function (e) {
-            _.each(e.nodes, function (id) {
-                var n = nodeDS.get(id);
-                n.physics = !n.physics
-                nodeDS.update(n);
-
-            })
+        network.on('dragStart', function (e) {
+            if (e.event && e.event.pointers && e.event.pointers[0].ctrlKey) {
+                _.each(e.nodes, function (id) {
+                    var n = nodeDS.get(id);
+                    n.physics = false
+                    nodeDS.update(n);
+                })
+            } else {
+                _.each(e.nodes, function (id) {
+                    var n = nodeDS.get(id);
+                    n.physics = true;
+                    s
+                    nodeDS.update(n);
+                })
+            }
         })
 
         function clickHandler(e) {
