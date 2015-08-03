@@ -199,3 +199,9 @@ Browser
 在 Node.JS 中和 Stream 相关的几个类的设计和 `Java` 类似，都使用到装饰器的设计模式，层层嵌套。
 
 [v8源码](https://github.com/joyent/node/blob/master/lib/_stream_writable.js#L159)
+
+### 参考资料
+
+[Heap Profiling](https://developers.google.com/chrome-developer-tools/docs/heap-profiling)
+
+[了解 JavaScript 应用程序中的内存泄漏](http://www.ibm.com/developerworks/cn/web/wa-jsmemory/)
