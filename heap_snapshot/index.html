@@ -23,6 +23,9 @@
     </script>
 </head>
 <body>
+<div id="drop">
+    把 .heapsnapshot 文件拖到这里<br/>
+</div>
 <p id="tips">请耐心等待
     <progress id="progress"></progress>
 </p>
@@ -43,8 +46,36 @@
 <script src="../lib/jquery-2.1.4.min.js"></script>
 <script src="../lib/vis.min.js"></script>
 <script src="../lib/underscore-min.js"></script>
+<script src="../common/jquery.droppable.js"></script>
 <script type="text/javascript">
-    $.getJSON("nodejs.heapsnapshot", function (root) {
+    $("#drop").droppable(function (file, result) {
+        try {
+            var data = JSON.parse(result);
+            if (data.snapshot) {
+                if (data.samples) {
+                    draw(data);
+                    $("#drop").css({
+                        background: "white"
+                    })
+                    $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
+
+                    _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
+                } else {
+                    throw new Error("不支持的版本");
+                }
+            } else {
+                throw new Error("格式不支持");
+            }
+        } catch (e) {
+            alert(e.message);
+
+            _hmt && _hmt.push(['_trackEvent', "events", 'draw_error']);
+        }
+    })
+
+    $.getJSON("nodejs.heapsnapshot", draw);
+
+    function draw(root) {
 
         console.time('process_data');
 
@@ -324,7 +355,7 @@
             });
         }
 
-    });
+    }
 
 </script>
 </html>

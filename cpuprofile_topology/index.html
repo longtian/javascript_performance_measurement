@@ -8,6 +8,7 @@
     <script src="../lib/jquery-2.1.4.min.js"></script>
     <script src="../lib/underscore-min.js"></script>
     <script src="../lib/vis.min.js"></script>
+    <script src="../common/jquery.droppable.js"></script>
     <link rel="stylesheet" href="../common/styles.css"/>
     <script>
         var _hmt = _hmt || [];
@@ -30,47 +31,28 @@
 
     $(function () {
 
-        $(window).on('dragenter', function () {
-            $("#drop").css({
-                background: "orange"
-            })
-        })
+        $("#drop").droppable(function (file, result) {
+            try {
+                var data = JSON.parse(result);
+                if (data.head) {
+                    if (data.samples) {
+                        draw(data);
+                        $("#drop").css({
+                            background: "white"
+                        })
+                        $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
 
-        $("#drop").on('dragover', function (e) {
-            e.preventDefault();
-        }).on('drop', function (e) {
-            _hmt && _hmt.push(['_trackEvent', 'events', 'drop']);
-
-            e.preventDefault();
-            var reader = new FileReader();
-            var file = e.originalEvent.dataTransfer.files[0];
-
-            reader.onload = function () {
-                try {
-                    var data = JSON.parse(reader.result);
-                    if (data.head) {
-                        if (data.samples) {
-                            draw(data);
-                            $("#drop").css({
-                                background: "white"
-                            })
-                            $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
-
-                            _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
-                        } else {
-                            throw new Error("不支持的版本");
-                        }
+                        _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
                     } else {
-                        throw new Error("格式不支持");
+                        throw new Error("不支持的版本");
                     }
-                } catch (e) {
-                    alert(e.message);
-
-                    _hmt && _hmt.push(['_trackEvent', "events", 'draw_error', file.name, file.size]);
+                } else {
+                    throw new Error("格式不支持");
                 }
+            } catch (e) {
+                alert(e.message);
+                _hmt && _hmt.push(['_trackEvent', "events", 'draw_error', file.name, file.size]);
             }
-
-            reader.readAsText(file);
         })
 
         $("#next").click(function () {
