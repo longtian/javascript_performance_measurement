@@ -184,15 +184,31 @@
                     e_prop = s[e[base + 1]];
                 }
 
+                /**
+                 * context: "0"
+                 * element: "1"
+                 * property: "2"
+                 * internal: "3"
+                 * hidden: "4"
+                 * shortcut: "5"
+                 * weak: "6"
+                 */
                 var e_found = {
                     id: base,
                     from: i_id,
                     to: n[e_to + 2],
-                    group: e_type,
                     arrows: 'middle',
                     title: META.edge_types[0][e_type],
                     label: e_prop
                 };
+
+                if (e_type == NAMING.EDGE_TYPES["internal"]) {
+                    e_found.dashes = true;
+                    e_found.arrows = 'to';
+                } else if (e_type == NAMING.EDGE_TYPES["hidden"]) {
+                    e_found.dashes = true;
+                    e_found.arrows = 'to';
+                }
 
                 EDGES_ARRAY.push(e_found);
             }
@@ -250,15 +266,6 @@
             edges: edgeDS
         };
 
-        /**
-         * context: "0"
-         * element: "1"
-         * hidden: "4"
-         * internal: "3"
-         * property: "2"
-         * shortcut: "5"
-         * weak: "6"
-         */
         var options = {
             height: ($(window).innerHeight() - 80) + "px",
             nodes: {
@@ -296,7 +303,14 @@
                 color: "#dd8482"
             },
             shape: "dot",
-            size: 2
+            size: 5
+        }
+
+        options.groups[NAMING.NODE_TYPES["hidden"]] = {
+            color: "#cccccc",
+            font: {
+                color: "#cccccc"
+            }
         }
 
         options.groups[NAMING.NODE_TYPES["number"]] = {
@@ -319,6 +333,27 @@
             font: {
                 color: "#666666"
             }
+        }
+
+        options.groups[NAMING.NODE_TYPES["string"]] = {
+            shape: "text",
+            color: "#d66966",
+            font: {
+                color: "#d66966"
+            }
+        }
+
+        options.groups[NAMING.NODE_TYPES["closure"]] = {
+            shape: "triangle",
+            color: "orange"
+        }
+
+        options.groups[NAMING.NODE_TYPES["code"]] = {
+            color: "orange"
+        }
+
+        options.groups[NAMING.NODE_TYPES["object"]] = {
+            shape: "square"
         }
 
         console.timeEnd('process_data');
