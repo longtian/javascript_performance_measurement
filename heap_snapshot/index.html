@@ -6,6 +6,7 @@
     <title>OneHeap</title>
     <link rel="stylesheet" href="../lib/vis.css">
     <link rel="stylesheet" href="../common/styles.css"/>
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/fontawesome/4.2.0/css/font-awesome.css"/>
     <style>
         #root {
             height: 600px;
@@ -26,19 +27,43 @@
 <div id="drop">
     把 .heapsnapshot 文件拖到这里<br/>
 </div>
+<div>
+    鼠标模式：
+    <label>
+        <input type="radio" name="mode" checked>
+        默认
+    </label>
+
+    <label>
+        <input type="radio" name="mode" value="from">
+        <i class="fa fa-expand"></i>起点
+    </label>
+
+    <label>
+        <input type="radio" name="mode" value="to">
+        <i class="fa fa-compress"></i>汇入
+    </label>
+
+    <label>
+        <input type="radio" name="mode" value="fix">
+        <i class="fa fa-anchor"></i>固定
+    </label>
+
+    <label>
+        <input type="radio" name="mode" value="unchain">
+        <i class="fa fa-chain-broken"></i>断开
+    </label>
+
+    <label>
+        <input type="radio" name="mode" value="remove">
+        <i class="fa fa-trash-o"></i>删除
+    </label>
+</div>
 <div id="root"></div>
-<p>
-<ul>
-    <li>CTRL + 单击 ： 展开 to 节点</li>
-    <li>ALT  + 单击 ： 展开 from 节点</li>
-    <li>CTRL + 拖拽 ： 固定节点</li>
-    <li>SHIFT + 单击 ： 删除节点</li>
-</ul>
-</p>
 <footer>
-    2015 MIT License <a target="_blank"
-                        href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">OneProfile
-    on Github</a>
+    <a target="_blank"
+       href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/heap_snapshot">
+        <i class="fa fa-github"></i></a>
 </footer>
 </body>
 <script src="../lib/jquery-2.1.4.min.js"></script>
@@ -300,64 +325,49 @@
 
         network.on('click', clickHandler);
 
-        network.on('dragStart', function (e) {
-            if (e.event && (e.event.pointers[0].ctrlKey || e.event.pointers[0].metaKey )) {
-                _.each(e.nodes, function (id) {
-                    var n = nodeDS.get(id);
-                    n.physics = false
-                    nodeDS.update(n);
-                })
-            } else {
-                _.each(e.nodes, function (id) {
-                    var n = nodeDS.get(id);
-                    n.physics = true;
-                    s
-                    nodeDS.update(n);
-                })
-            }
-        })
+        function toggleFix(e) {
+            _.each(e.nodes, function (id) {
+                var n = nodeDS.get(id);
+                n.physics = !n.physics;
+                nodeDS.update(n);
+            })
+        }
 
         function clickHandler(e) {
-            if (e.event && e.event.pointers && (e.event.pointers[0].ctrlKey || e.event.pointers[0].metaKey )) {
-                addNodeHandler(e,'from');
-            } else if (e.event && e.event.pointers && e.event.pointers[0].altKey ) {
-                addNodeHandler(e,'to');
-            } else if (e.event && e.event.pointers && e.event.pointers[0].shiftKey) {
-                removeNodeHandler(e);
+            switch ($(":checked").val()) {
+                case 'from':
+                    expand(e, 'from');
+                    break
+                case 'to':
+                    expand(e, 'to');
+                    break
+                case 'remove':
+                    remove(e);
+                    break;
+                case 'fix':
+                    toggleFix(e);
+                    break
+                case 'unchain':
+                    unchain(e);
+                    break
             }
         }
 
-        function removeNodeHandler(e) {
-            _.each(e.nodes, function (id) {
-
-                if (nodeDS.get(id)) {
-                    nodeDS.remove(id);
-                }
-
-                var edges = _.filter(EDGES_ARRAY, function (edge) {
-                    return edge.from == id || edge.to == id;
-                }).map(function (edge) {
-                    return edge.id;
-                });
-
-                edgeDS.remove(edges);
-
-            });
+        function unchain(e) {
+            edgeDS.remove(e.edges);
         }
 
-        function addNodeHandler(e,direction) {
+        function remove(e) {
+            nodeDS.remove(e.nodes);
+            edgeDS.remove(e.edges);
+        }
+
+        function expand(e, direction) {
             _.each(e.nodes, function (id) {
 
-                if(direction==='from'){
-                    var edges = _.where(EDGES_ARRAY, {
-                        from: parseInt(id)
-                    });
-                }else{
-                    var edges = _.where(EDGES_ARRAY, {
-                        to: parseInt(id)
-                    });
-                }
-
+                var condition = {};
+                condition[direction] = parseInt(id)
+                var edges = _.where(EDGES_ARRAY, condition);
 
                 if (edges.length > 30 && !window.confirm('确认要展开 ' + edges.length + ' 条边么？')) {
                     return;
@@ -365,11 +375,11 @@
 
                 _.each(edges, function (edge) {
 
-                    if(direction==='from'){
+                    if (direction === 'from') {
                         if (!nodeDS.get(edge.to)) {
                             nodeDS.add(NODES_MAP[edge.to]);
                         }
-                    }else{
+                    } else {
                         if (!nodeDS.get(edge.from)) {
                             nodeDS.add(NODES_MAP[edge.from]);
                         }
