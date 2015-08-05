@@ -15,8 +15,8 @@
 
         if (!STYLING_EVENTS_BINDED) {
             $(window).on('dragenter', function () {
-                $("." + DROPPABLE_CLASSNAME).css({
-                    background: "orange"
+                $("." + DROPPABLE_CLASSNAME).addClass("active").css({
+                    height: $(window).innerHeight()
                 });
             });
             STYLING_EVENTS_BINDED = true;

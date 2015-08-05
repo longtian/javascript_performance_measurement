@@ -8,9 +8,14 @@
     <link rel="stylesheet" href="../common/styles.css"/>
     <link rel="stylesheet" href="//apps.bdimg.com/libs/fontawesome/4.2.0/css/font-awesome.css"/>
     <style>
-        #root {
-            height: 600px;
-            border: 1px solid;
+        @media (max-width: 414px) {
+            label span {
+                display: none;
+            }
+
+            input[type=file] {
+                display: none;
+            }
         }
     </style>
     <script>
@@ -28,7 +33,9 @@
     把 .heapsnapshot 文件拖到这里<br/>
 </div>
 <div>
-    鼠标模式：
+    <label>
+        <span>鼠标模式：</span>
+    </label>
     <label>
         <input type="radio" name="mode" checked>
         默认
@@ -36,28 +43,29 @@
 
     <label>
         <input type="radio" name="mode" value="from">
-        <i class="fa fa-expand"></i>起点
+        <i class="fa fa-expand"></i><span>起点</span>
     </label>
 
     <label>
         <input type="radio" name="mode" value="to">
-        <i class="fa fa-compress"></i>汇入
+        <i class="fa fa-compress"></i><span>汇入</span>
     </label>
 
     <label>
         <input type="radio" name="mode" value="fix">
-        <i class="fa fa-anchor"></i>固定
+        <i class="fa fa-anchor"></i><span>固定</span>
     </label>
 
     <label>
         <input type="radio" name="mode" value="unchain">
-        <i class="fa fa-chain-broken"></i>断开
+        <i class="fa fa-chain-broken"></i><span>断开</span>
     </label>
 
     <label>
         <input type="radio" name="mode" value="remove">
-        <i class="fa fa-trash-o"></i>删除
+        <i class="fa fa-trash-o"></i><span>删除</span>
     </label>
+    <input id="file" type="file">
 </div>
 <div id="root"></div>
 <footer>
@@ -77,12 +85,8 @@
             var data = JSON.parse(result);
             if (data.snapshot) {
                 draw(data);
-
-                $("#drop")
-                        .css({
-                            background: "white"
-                        })
-                        .text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
+                $("#drop").removeClass('active');
+                $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
 
                 _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
 
@@ -90,8 +94,8 @@
                 throw new Error("格式不支持");
             }
         } catch (e) {
+            $("#drop").removeClass('active');
             alert(e.message);
-
             _hmt && _hmt.push(['_trackEvent', "events", 'draw_error']);
         }
     })
@@ -256,6 +260,7 @@
          * weak: "6"
          */
         var options = {
+            height: ($(window).innerHeight() - 80) + "px",
             nodes: {
                 size: 10,
                 shape: "dot"
@@ -392,6 +397,24 @@
 
             });
         }
+
+        $('#file')[0].addEventListener('change', function () {
+
+            var reader = new FileReader();
+            var file = this.files[0];
+
+            reader.onload = function () {
+                try {
+                    var data = JSON.parse(reader.result);
+                    draw(data);
+                } catch (e) {
+                    alert(e.message);
+                }
+
+            };
+
+            reader.readAsText(file);
+        })
 
     }
 

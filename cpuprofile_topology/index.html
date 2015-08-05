@@ -11,6 +11,7 @@
     <script src="../common/jquery.droppable.js"></script>
     <script src="../common/track_progress.js"></script>
     <link rel="stylesheet" href="../common/styles.css"/>
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/fontawesome/4.2.0/css/font-awesome.css"/>
     <script>
         var _hmt = _hmt || [];
         (function () {
@@ -38,9 +39,7 @@
                 if (data.head) {
                     if (data.samples) {
                         draw(data);
-                        $("#drop").css({
-                            background: "white"
-                        })
+                        $("#drop").removeClass('active')
                         $("#drop").text(file.name + " " + (Math.floor(file.size / 1024) + " KB"));
 
                         _hmt && _hmt.push(['_trackEvent', "events", 'draw_success', file.name, file.size]);
@@ -51,6 +50,7 @@
                     throw new Error("格式不支持");
                 }
             } catch (e) {
+                $("#drop").removeClass('active')
                 alert(e.message);
                 _hmt && _hmt.push(['_trackEvent', "events", 'draw_error', file.name, file.size]);
             }
@@ -198,7 +198,7 @@
 
         var options = {
             width: "95%",
-            height: (window.innerHeight - $("#drop").outerHeight() - $("#control").outerHeight() - 40) + "px",
+            height: (window.innerHeight - $("#control").outerHeight() - 40) + "px",
             layout: {
                 hierarchical: {
                     enabled: true
@@ -243,15 +243,16 @@
 </script>
 <div id="control">
     <form>
-        <button id="prev">prev</button>
-        <button id="next">next</button>
+        <button id="prev"><i class="fa fa-step-backward"></i></button>
+        <button id="next"><i class="fa fa-step-forward"></i></button>
         <span id="time_text"></span>
         <input id="time" type="range" step="1" style="width: 98%"/>
     </form>
     <footer>
-        2015 MIT License <a target="_blank"
-                            href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">OneProfile
-        on Github</a>
+        <a target="_blank"
+           href="https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/cpuprofile_topology">
+            <i class="fa fa-github"></i>
+        </a>
     </footer>
 </div>
 
