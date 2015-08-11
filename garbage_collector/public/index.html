@@ -2,58 +2,97 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>OneGC</title>
     <link rel="stylesheet" href="../../lib/vis.css"/>
+
+    <link rel="stylesheet" href="../../common/styles.css">
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/fontawesome/4.2.0/css/font-awesome.css"/>
 </head>
 <body>
-<h1>OneGC</h1>
+<h1>OneGC </h1>
 
+<div id="status"></div>
 <div id="root"></div>
 
 <script src="../../lib/jquery-2.1.4.min.js"></script>
 <script src="../../lib/vis.min.js"></script>
 <script type="text/javascript">
-    var ws = new WebSocket('ws://localhost:3002/');
-    var ds = new vis.DataSet([]);
-    var groups = new vis.DataSet();
-    var container = document.getElementById("root");
+    $(function () {
 
-    ["total_size_diff", "total_size_after","allocated"].forEach(function (name) {
-        groups.add({
-            id: name,
-            content: name,
-            options: {
-                style: "bar",
-                yAxisOrientation: "right",
-                drawPoints: false,
+        var url = 'ws://localhost:3002/';
+        var ws = new WebSocket(url);
+        var spin = '<i class="fa fa-spinner fa-spin"></i>';
+        var ui_set_up = false;
 
+        setInterval(function () {
+            if (ws.readyState != 1) {
+                ws = new WebSocket(url);
+
+                ws.onclose = closeHandler
+                ws.onmessage = messageHandler;
+                ws.onopen = openHandler;
             }
-        })
-    });
+        }, 5000);
 
-    var options = {
-        start: Date.now(),
-        end: Date.now() + 30000,
-        legend: true,
-        interpolation: false,
-        stack: true,
-    };
+        ws.onclose = closeHandler
+        ws.onmessage = messageHandler;
+        ws.onopen = openHandler;
 
-    var graph2d = new vis.Graph2d(container, ds, groups, options);
+        var ds = new vis.DataSet([]);
 
-    ws.onmessage = function (e) {
-        var nodes = JSON.parse(e.data);
-        nodes.forEach(function (node) {
-            if (!groups.get(node.group)) {
-                groups.add({
-                    id: node.group,
-                    content: node.group
-                });
+        function setUpUI() {
+            var groups = new vis.DataSet();
+            var container = document.getElementById("root");
+            var options = {
+                start: Date.now(),
+                end: Date.now() + 30000,
+                legend: true,
+                interpolation: false
+            };
+            var graph2d = new vis.Graph2d(container, ds, groups, options);
+            ui_set_up = true;
+            groups.add({
+                id: "total_size_before",
+                content: "total_size_before"
+            })
+            groups.add({
+                id: "total_size_after",
+                content: "total_size_after"
+            })
+        }
+
+        function messageHandler(e) {
+            var node = JSON.parse(e.data);
+            ds.add([{
+                group: "total_size_before",
+                x: node.time,
+                y: node.total_size_before
+            }, {
+                group: "total_size_after",
+                x: node.time,
+                y: node.total_size_after
+            }])
+        }
+
+        function closeHandler() {
+            $('#status').css({
+                backgroundColor: "red",
+                color: "white"
+            }).html('与 ' + url + ' 的连接已断开。' + spin);
+        }
+
+        function openHandler() {
+            $('#status').css({
+                backgroundColor: "blue",
+                color: "white"
+            }).html('已连接到 ' + url);
+            if (!ui_set_up) {
+                setUpUI();
             }
-        })
+        }
 
-        ds.add(nodes)
-    }
+    })
+
 
 </script>
 </body>

@@ -9,6 +9,7 @@
   "author": "wyvernnot",
   "license": "MIT",
   "dependencies": {
+    "underscore": "^1.8.3",
     "ws": "^0.7.2"
   }
 }
