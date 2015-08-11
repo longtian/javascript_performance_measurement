@@ -45,7 +45,7 @@ function parseLine(l) {
     }
 
     if (l.match(AVAL_REG)) {
-      res.available = parseInt(l.match(USED_REG)[1]) * 1024;
+      res.available = parseInt(l.match(AVAL_REG)[1]) * 1024;
     }
 
     if (l.match(COMM_REG)) {
