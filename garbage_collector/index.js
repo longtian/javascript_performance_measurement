@@ -1,26 +1,32 @@
-var buffer1 = [];
-var buffer2 = [];
-var now = t();
+"use strict";
 
-setInterval(function () {
-  buffer1.push((new Array(1E6)).join("."));
-}, 100);
+var WebSocketServer = require('ws').Server;
+var wss = new WebSocketServer({port: 3002});
 
-function h(int) {
-  return Math.round(int / 1024);
+function broadCast(obj) {
+  wss.clients.forEach(function (client) {
+    client.send(JSON.stringify(obj));
+  });
 }
 
-function t() {
-  var a = process.hrtime();
-  return a[0] * 1000 + a[1] / 1E6;
-}
-
-setInterval(function () {
+function broadcastMemory() {
   var mem = process.memoryUsage();
-  console.log("%d ms", t() - now);
-  console.log("[%d] RSS, \t\t    used:\t%d KB", process.pid, h(mem.rss));
-  console.log("[%d] Heap total, \t    used:\t%d KB", process.pid, h(mem.heapTotal));
-  console.log("[%d] Heap used, \t    used: \t%d KB", process.pid, h(mem.heapUsed));
-  console.log("");
-  buffer1 = [];
-}, 1000);
+
+  broadCast([{
+    x: Date.now(),
+    group: 0,
+    y: mem.heapUsed
+  }, {
+    x: Date.now(),
+    group: 1,
+    y: mem.heapTotal
+  }, {
+    x: Date.now(),
+    group: 2,
+    y: mem.rss
+  }]);
+}
+
+setInterval(function () {
+  broadcastMemory();
+}, 1000)

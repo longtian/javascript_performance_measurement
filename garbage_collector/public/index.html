@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../../lib/vis.css"/>
+</head>
+<body>
+<h1>OneGC</h1>
+
+<div id="root"></div>
+
+<script src="../../lib/jquery-2.1.4.min.js"></script>
+<script src="../../lib/vis.min.js"></script>
+<script type="text/javascript">
+    var ws = new WebSocket('ws://localhost:3002/');
+    var ds = new vis.DataSet([]);
+    var groups = new vis.DataSet();
+    groups.add({
+        id: 0,
+        content: "heapUsed",
+        options: {
+            drawPoints: false,
+            interpolation: {
+                parametrization: 'chordal'
+            }
+        }
+    })
+    groups.add({
+        id: 1,
+        content: "heapTotal",
+        options: {
+            drawPoints: false,
+            interpolation: {
+                parametrization: 'chordal'
+            }
+        }
+    })
+    groups.add({
+        id: 2,
+        content: "rss",
+        options: {
+            drawPoints: false,
+            interpolation: {
+                parametrization: 'chordal'
+            }
+        }
+    })
+
+
+    var options = {
+        start: Date.now(),
+        end: Date.now() + 30000,
+        legend: true
+    };
+    var graph2d = new vis.Graph2d(document.getElementById("root"), ds, groups, options);
+
+    ws.onmessage = function (e) {
+        var node = JSON.parse(e.data);
+
+        console.log(node);
+        ds.add(node)
+    }
+</script>
+</body>
+</html>
