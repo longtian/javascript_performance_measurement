@@ -1,10 +1,17 @@
 {
-  "name": "garbage_collector",
-  "version": "1.0.0",
-  "description": "",
+  "name": "onegc",
+  "version": "0.0.1",
+  "description": "Pipe formated GC log to browser via websocket",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wyvernnot/javascript_performance_measurement.git"
+  },
+  "bin":{
+    "onegc":"./bin/onegc"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./start.sh"
   },
   "author": "wyvernnot",
   "license": "MIT",

@@ -247,9 +247,23 @@ V8 对内存的管理和与内存分配相关的系统调用密切相关：
 sudo strace -p pid -e mmap,munmap -ttt
 ```
 
-## 用于测试的文件
+## OneGC 使用说明
 
-[index.js](https://github.com/wyvernnot/javascript_performance_measurement/tree/gh-pages/garbage_collector/example/index.js)
+1\.安装命令行工具 `onegc`
+
+```
+npm install onegc -g
+```
+
+2\.用下面的命令启动 Node.JS 应用
+
+```
+node --trace_gc --trace_gc_nvp --trace_gc_verbose server.js | onegc
+```
+
+3\.在浏览器里打开浏览器端
+
+[OneGC](http://wyvernnot.github.io/javascript_performance_measurement/garbage_collector/public/)
 
 ## 参考资料
 
