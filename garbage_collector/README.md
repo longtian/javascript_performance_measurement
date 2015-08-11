@@ -1,6 +1,6 @@
 # OneGC
 
-> 把 v8 引擎垃圾回收的过程可视化。
+> 把 V8 垃圾回收的过程可视化。
 
 ## V8 的 Heap 结构
 
@@ -72,7 +72,21 @@
 
 ## 如何开启 V8 的 GC 日志 
 
-使用 `node --v8-options | grep gc` 可以查看所有和 GC 相关的选项。
+运行一个 JavaScript 应用程序的命令。
+
+```
+node index.js
+```
+
+如果要输出 GC 日志，只需要加上一个配置项：
+
+```
+node --trace_gc index.js
+```
+
+这里的 `--trace_gc` 是 V8 的一个配置项，所以要放在中间，也就是说如果把命令敲成 `node index.js --trace_gc` 是不可以的。
+
+如果想知道除了 `--trace_gc` 还有哪些配置项可以用，可以用命令 `node --v8-options | grep gc` 列出所有和 GC 相关的选项。
 
 ```
   --expose_gc (expose gc extension)
@@ -90,53 +104,64 @@
   --gc_fake_mmap (Specify the name of the file for fake gc mmap used in ll_prof)
 ```
 
-重点关注的选项
+需要重点关注的选项：
 
 - `--trace_gc` 
 - `--trace_gc_nvp` 
 - `--trace_gc_verbose`
 
-这些选项之间有叠加和覆盖的关系，对应的关系可以从源码中找到：
+这些选项之间有叠加和覆盖的关系：
 
-[void GCTracer::Stop()](https://github.com/joyent/node/blob/d13d7f74d794340ac5e126cfb4ce507fe0f803d5/deps/v8/src/heap/gc-tracer.cc#L174)
+1\. 如果启动应用的时候开启了 `--trace-gc` 选项，则每次GC后输出一行简明扼要的信息。
 
-```
-if (FLAG_trace_gc) {
-    if (FLAG_trace_gc_nvp)
-      PrintNVP();
-    else
-      Print();
-
-    heap_->PrintShortHeapStatistics();
-  }
-```
-
-[void Heap::PrintShortHeapStatistics()](https://github.com/joyent/node/blob/d13d7f74d794340ac5e126cfb4ce507fe0f803d5/deps/v8/src/heap/heap.cc#L316)
-
-```
-void Heap::PrintShortHeapStatistics() {
-  if (!FLAG_trace_gc_verbose) return;
-  ...
-```
-
-如果启动 Node.JS 应用的时候开启了 `--trace-gc` 选项，但是不加 `--trace_gc_nvp` ，则每次GC后输出一行简要的信息。
-如果加上 `--trace_gc_verbose` 则输出一些列的键值对。
-
-示例1： `node --trace_gc  index.js`
+**示例1:** `node --trace_gc  index.js`
 
 输出：
 
 ```
 [10189]      682 ms: Scavenge 2.3 (36.0) -> 1.9 (37.0) MB, 1 ms [Runtime::PerformGC].
+...
 ```
 
-示例2： `node --trace_gc --trace_gc_nvp  index.js`
+2\. 如果加上 `--trace_gc_verbose` 则输出一些列的键值对。
+
+**示例2：** `node --trace_gc --trace_gc_nvp  index.js`
 
 输出：
 
 ```
 [9893]      636 ms: pause=0 mutator=0 gc=s external=0 mark=0 sweep=0 sweepns=0 evacuate=0 new_new=0 root_new=0 old_new=0 compaction_ptrs=0 intracompaction_ptrs=0 misc_compaction=0 total_size_before=2398448 total_size_after=2017168 holes_size_before=169032 holes_size_after=176640 allocated=2398448 promoted=392648 stepscount=0 stepstook=0 
 ```
+
+3\. 第三个选项和 GC 没有直接的关系，但是可以在每次 GC 结束后输出各个区域的分配情况。
+
+示例3: `node --trace_gc --trace_gc_verbose  index.js`
+
+```
+[9800]     9870 ms: Scavenge 3.0 (37.0) -> 2.2 (37.0) MB, 1 ms [allocation failure].
+[9800] Memory allocator,   used:  37904 KB, available: 1461232 KB
+[9800] New space,          used:     87 KB, available:   1960 KB, committed:   4096 KB
+[9800] Old pointers,       used:   1011 KB, available:    164 KB, committed:   1519 KB
+[9800] Old data space,     used:    579 KB, available:      7 KB, committed:   1199 KB
+[9800] Code space,         used:    430 KB, available:      0 KB, committed:    996 KB
+[9800] Map space,          used:     93 KB, available:      0 KB, committed:    128 KB
+[9800] Cell space,         used:     15 KB, available:      0 KB, committed:    128 KB
+[9800] Large object space, used:      0 KB, available: 1460191 KB, committed:      0 KB
+[9800] All spaces,         used:   2218 KB, available:   2132 KB, committed:   8067 KB
+[9800] Total time spent in GC  : 4 ms
+```
+
+这三个选项的对应的关系可以从源码中找到：
+[void GCTracer::Stop()](https://github.com/joyent/node/blob/d13d7f74d794340ac5e126cfb4ce507fe0f803d5/deps/v8/src/heap/gc-tracer.cc#L174)
+[void Heap::PrintShortHeapStatistics()](https://github.com/joyent/node/blob/d13d7f74d794340ac5e126cfb4ce507fe0f803d5/deps/v8/src/heap/heap.cc#L316)
+
+
+## OneGC 的实现原理
+
+通过在 Node.JS 启动过程中加上相应的配置项，把 GC 日志输出到命令行，接着通过操作系统的管道传递给另外一个 Node.JS 实现的工具。
+这个工具能够解析命令行的输出，并通过 WebSocket 传递给浏览器里的应用，由浏览器负责视觉呈现。
+
+实现的难点在与对 GC 日志格式的理解。
 
 ### 键值对中每个属性的含义
 
@@ -181,25 +206,7 @@ steps_took|
 longest_step|
 incremental_marking_throughput|
 
-### GC 结束后输出内存信息
-
-示例3: `node --trace_gc --trace_gc_verbose  index.js`
-
-```
-[9800]     9870 ms: Scavenge 3.0 (37.0) -> 2.2 (37.0) MB, 1 ms [allocation failure].
-[9800] Memory allocator,   used:  37904 KB, available: 1461232 KB
-[9800] New space,          used:     87 KB, available:   1960 KB, committed:   4096 KB
-[9800] Old pointers,       used:   1011 KB, available:    164 KB, committed:   1519 KB
-[9800] Old data space,     used:    579 KB, available:      7 KB, committed:   1199 KB
-[9800] Code space,         used:    430 KB, available:      0 KB, committed:    996 KB
-[9800] Map space,          used:     93 KB, available:      0 KB, committed:    128 KB
-[9800] Cell space,         used:     15 KB, available:      0 KB, committed:    128 KB
-[9800] Large object space, used:      0 KB, available: 1460191 KB, committed:      0 KB
-[9800] All spaces,         used:   2218 KB, available:   2132 KB, committed:   8067 KB
-[9800] Total time spent in GC  : 4 ms
-```
-
-## 操作内存如何分配
+### 操作内存如何分配
 
 V8 对内存的管理和与内存分配相关的系统调用密切相关：
 
@@ -234,7 +241,7 @@ V8 对内存的管理和与内存分配相关的系统调用密切相关：
 **length**
 映射区的长度
 
-实际工作中可以使用 `strace` 记录系统调用。
+实际工作中可以使用 `strace` 记录系统调用的情况。
 
 ```
 sudo strace -p pid -e mmap,munmap -ttt
