@@ -2,6 +2,8 @@
 
 > 把 V8 垃圾回收的过程可视化。
 
+![截图](images/screenshot.png)
+
 ## V8 的 Heap 结构
 
 [v8源码注释](https://github.com/joyent/node/blob/d13d7f74d794340ac5e126cfb4ce507fe0f803d5/deps/v8/src/heap/spaces.h#L21)
