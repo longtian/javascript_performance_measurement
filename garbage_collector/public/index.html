@@ -39,39 +39,68 @@
         ws.onopen = openHandler;
 
         var ds = new vis.DataSet([]);
+        var groups = new vis.DataSet();
 
         function setUpUI() {
-            var groups = new vis.DataSet();
             var container = document.getElementById("root");
             var options = {
                 start: Date.now(),
                 end: Date.now() + 30000,
                 legend: true,
-                interpolation: false
+                interpolation: false,
+                stack: true
             };
             var graph2d = new vis.Graph2d(container, ds, groups, options);
             ui_set_up = true;
-            groups.add({
-                id: "total_size_before",
-                content: "total_size_before"
-            })
-            groups.add({
-                id: "total_size_after",
-                content: "total_size_after"
+
+            var default_groups = [
+                "total_size_before",
+                "total_size_after",
+                "memory_allocator",
+                "all_spaces",
+                "new_space",
+                "old_pointers",
+                "old_data_space",
+                "code_space",
+                "map_space",
+                "cell_space",
+                "large_object_space",
+            ];
+
+            default_groups.forEach(function (item, i) {
+                var group_option = {
+                    id: item,
+                    content: item
+                };
+                if (i > 3) {
+                    group_option.options = {
+                        style: "bar",
+                        yAxisOrientation: 'right'
+                    }
+                }
+                groups.add(group_option)
             })
         }
 
         function messageHandler(e) {
             var node = JSON.parse(e.data);
-            ds.add([{
-                group: "total_size_before",
-                x: node.time,
-                y: node.total_size_before
-            }, {
-                group: "total_size_after",
-                x: node.time,
-                y: node.total_size_after
-            }])
+            if (node.type == "gc") {
+                ds.add([{
+                    group: "total_size_before",
+                    x: node.time,
+                    y: node.total_size_before
+                }, {
+                    group: "total_size_after",
+                    x: node.time,
+                    y: node.total_size_after
+                }])
+            } else {
+                ds.add([{
+                    group: node.type,
+                    x: node.time,
+                    y: node.used
+                }])
+            }
         }
 
         function closeHandler() {

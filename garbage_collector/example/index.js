@@ -5,8 +5,8 @@ var buffer1 = [];
 
 setInterval(function () {
   buffer1.push((new Array(1E6)).join("."));
-}, 100);
+}, 300);
 
 setInterval(function () {
   buffer1 = [];
-}, 1000);
+}, 3000);
