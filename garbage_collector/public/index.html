@@ -16,51 +16,45 @@
     var ws = new WebSocket('ws://localhost:3002/');
     var ds = new vis.DataSet([]);
     var groups = new vis.DataSet();
-    groups.add({
-        id: 0,
-        content: "heapUsed",
-        options: {
-            drawPoints: false,
-            interpolation: {
-                parametrization: 'chordal'
-            }
-        }
-    })
-    groups.add({
-        id: 1,
-        content: "heapTotal",
-        options: {
-            drawPoints: false,
-            interpolation: {
-                parametrization: 'chordal'
-            }
-        }
-    })
-    groups.add({
-        id: 2,
-        content: "rss",
-        options: {
-            drawPoints: false,
-            interpolation: {
-                parametrization: 'chordal'
-            }
-        }
-    })
+    var container = document.getElementById("root");
 
+    ["total_size_diff", "total_size_after","allocated"].forEach(function (name) {
+        groups.add({
+            id: name,
+            content: name,
+            options: {
+                style: "bar",
+                yAxisOrientation: "right",
+                drawPoints: false,
+
+            }
+        })
+    });
 
     var options = {
         start: Date.now(),
         end: Date.now() + 30000,
-        legend: true
+        legend: true,
+        interpolation: false,
+        stack: true,
     };
-    var graph2d = new vis.Graph2d(document.getElementById("root"), ds, groups, options);
+
+    var graph2d = new vis.Graph2d(container, ds, groups, options);
 
     ws.onmessage = function (e) {
-        var node = JSON.parse(e.data);
+        var nodes = JSON.parse(e.data);
+        nodes.forEach(function (node) {
+            if (!groups.get(node.group)) {
+                groups.add({
+                    id: node.group,
+                    content: node.group
+                });
+            }
+        })
 
-        console.log(node);
-        ds.add(node)
+        ds.add(nodes)
     }
+
 </script>
 </body>
 </html>
