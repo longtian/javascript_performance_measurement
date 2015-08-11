@@ -1,6 +1,6 @@
 {
   "name": "onegc",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Pipe formated GC log to browser via websocket",
   "main": "index.js",
   "repository": {
