@@ -22,6 +22,10 @@
 
 > 把 V8 垃圾回收的过程可视化。
 
+[点击打开 OneGC](http://wyvernnot.github.io/javascript_performance_measurement/garbage_collector/public)
+
+[原理和使用帮助](./garbage_collector/README.md)
+
 ------------------
 
 ## 更新日志
