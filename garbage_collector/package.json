@@ -1,22 +1,28 @@
 {
   "name": "onegc",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Pipe formated GC log to browser via websocket",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wyvernnot/javascript_performance_measurement.git"
   },
-  "bin":{
-    "onegc":"./bin/onegc"
+  "bin": {
+    "onegc": "./bin/onegc"
   },
   "scripts": {
-    "test": "./start.sh"
+    "test": "./node_modules/.bin/mocha test"
   },
   "author": "wyvernnot",
   "license": "MIT",
   "dependencies": {
     "underscore": "^1.8.3",
     "ws": "^0.7.2"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.com"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.5"
   }
 }

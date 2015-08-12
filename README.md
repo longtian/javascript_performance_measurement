@@ -18,6 +18,8 @@
 
 ## OneGC
 
+[![Build Status](https://travis-ci.org/wyvernnot/javascript_performance_measurement.svg?branch=gh-pages)](https://travis-ci.org/wyvernnot/javascript_performance_measurement)
+
 > 把 V8 垃圾回收的过程可视化。
 
 ------------------
