@@ -4,7 +4,7 @@
 
 > OneProfile 是一个网页版的小工具，可以用全新的方式展示 JavaScript 性能分析的结果，帮助开发者洞悉函数调用关系，优化应用性能。
 
-[点击打开 OneProfile](http://wyvernnot.github.io/javascript_performance_measurement/cpuprofile_topology/)
+[点击打开 OneProfile](//longtian.github.io/javascript_performance_measurement/cpuprofile_topology/)
 
 [原理和使用帮助](./cpuprofile_topology/README.md)
 
@@ -12,7 +12,7 @@
 
 > OneHeap 关注于运行中的 JavaScript 内存信息的展示，用可视化的方式还原了 HeapGraph，有助于理解 v8 内存管理。
 
-[点击打开 OneHeap](http://wyvernnot.github.io/javascript_performance_measurement/heap_snapshot/)
+[点击打开 OneHeap](//longtian.github.io/javascript_performance_measurement/heap_snapshot/)
 
 [原理和使用帮助](./heap_snapshot/README.md)
 
@@ -20,9 +20,9 @@
 
 [![Build Status](https://travis-ci.org/wyvernnot/javascript_performance_measurement.svg?branch=gh-pages)](https://travis-ci.org/wyvernnot/javascript_performance_measurement)
 
-> 把 V8 垃圾回收的过程可视化。
+> OneGC 把 V8 垃圾回收的过程可视化。
 
-[点击打开 OneGC](http://wyvernnot.github.io/javascript_performance_measurement/garbage_collector/public)
+[点击打开 OneGC](//longtian.github.io/javascript_performance_measurement/garbage_collector/public)
 
 [原理和使用帮助](./garbage_collector/README.md)
 
